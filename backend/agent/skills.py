@@ -36,7 +36,7 @@ Extract and return JSON with these exact fields:
 TRANSCRIPT:
 {transcript}"""
 
-    raw = chat(system, user, model="gpt-5-mini", max_tokens=3000)
+    raw = chat(system, user, model="gpt-4o-mini", max_completion_tokens=3000)
     import json, re
     # Strip markdown code blocks if present
     clean = re.sub(r"```(?:json)?", "", raw).strip().strip("`").strip()
@@ -106,7 +106,7 @@ Subject: [subject line]
 
 [email body]"""
 
-    return chat(system, user, model="gpt-5-mini", max_tokens=2000)
+    return chat(system, user, model="gpt-4o-mini", max_completion_tokens=2000)
 
 
 # ─────────────────────────────────────────────
@@ -159,7 +159,7 @@ Create a professional proposal in Markdown with these sections:
 
 Make it specific to {company}'s situation based on the transcript content."""
 
-    return chat(system, user, model="gpt-5-mini", max_tokens=3000)
+    return chat(system, user, model="gpt-4o-mini", max_completion_tokens=3000)
 
 
 # ─────────────────────────────────────────────
@@ -219,7 +219,7 @@ Generate an internal team plan in Markdown with:
 ## Blockers Needing Escalation
 (Anything that needs leadership attention)"""
 
-    return chat(system, user, model="gpt-5-mini", max_tokens=2500)
+    return chat(system, user, model="gpt-4o-mini", max_completion_tokens=2500)
 
 
 # ─────────────────────────────────────────────
@@ -270,7 +270,7 @@ Create a research report in Markdown with:
 
 Note: This is based on general industry knowledge since we have no prior history with this client."""
 
-    return chat(system, user, model="gpt-5-mini", max_tokens=2800)
+    return chat(system, user, model="gpt-4o-mini", max_completion_tokens=2800)
 
 
 # ─────────────────────────────────────────────
@@ -330,7 +330,7 @@ Generate a meeting prep document in Markdown:
 ## What Success Looks Like
 (What should we walk away with from this meeting?)"""
 
-    return chat(system, user, model="gpt-5-mini", max_tokens=2800)
+    return chat(system, user, model="gpt-4o-mini", max_completion_tokens=2800)
 
 
 # ─────────────────────────────────────────────
@@ -372,4 +372,4 @@ Subject: Re: {subject}
 
 [email body with proper greeting and sign-off as Marcus Reid / Diana Park, Engagement Lead at Augusta]"""
 
-    return chat(system, user, model="gpt-5-mini", max_tokens=2500)
+    return chat(system, user, model="gpt-4o-mini", max_completion_tokens=2500)

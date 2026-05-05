@@ -42,9 +42,9 @@ def get_client() -> OpenAI:
 def chat(
     system: str,
     user: str,
-    model: str = "gpt-5-mini",
+    model: str = "gpt-4o-mini",
     temperature: float = 0.7,
-    max_tokens: int = 4000,
+    max_completion_tokens: int = 4000,
 ) -> str:
     client = get_client()
     response = client.chat.completions.create(
@@ -54,7 +54,7 @@ def chat(
             {"role": "user", "content": user},
         ],
         temperature=temperature,
-        max_tokens=max_tokens,
+        max_completion_tokens=max_completion_tokens,
     )
     return response.choices[0].message.content
 
@@ -62,9 +62,9 @@ def chat(
 def chat_with_history(
     system: str,
     messages: list,
-    model: str = "gpt-5-mini",
+    model: str = "gpt-4o-mini",
     temperature: float = 0.7,
-    max_tokens: int = 2000,
+    max_completion_tokens: int = 2000,
 ) -> str:
     client = get_client()
     all_messages = [{"role": "system", "content": system}] + messages
@@ -72,6 +72,6 @@ def chat_with_history(
         model=model,
         messages=all_messages,
         temperature=temperature,
-        max_tokens=max_tokens,
+        max_completion_tokens=max_completion_tokens,
     )
     return response.choices[0].message.content

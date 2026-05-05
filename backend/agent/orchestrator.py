@@ -273,4 +273,4 @@ CURRENT PROJECT STATE:
 Help the user with questions, refinements, or analysis about this engagement.
 Be specific, use details from the project context. Keep responses concise but complete."""
 
-    return chat_with_history(system, messages, model="gpt-5-mini", max_tokens=1000)
+    return chat_with_history(system, messages, model="gpt-4o-mini", max_completion_tokens=1000)

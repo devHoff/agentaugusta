@@ -163,6 +163,6 @@ webapp/
 - **Single server** — FastAPI serves both the API and the React UI (no separate frontend build/deploy)
 - **In-browser React** — Babel + CDN React, no webpack/bundler required; instant startup
 - **JSON memory** — Simple flat file (`memory/memory.json`), easy to inspect and debug
-- **Reasoning model** — Uses `gpt-5-mini` with raised `max_tokens` to account for chain-of-thought overhead
+- **Reasoning model** — Uses `gpt-4o-mini` with raised `max_tokens` to account for chain-of-thought overhead
 - **Modular skills** — Each output type is a separate function; easy to add new skills or swap prompts
 - **Branching logic** — Meeting handler checks memory presence; transcript handler checks insight flags for optional outputs
