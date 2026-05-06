@@ -9,426 +9,413 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://unpkg.com/marked@9/marked.min.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --bg:       #ffffff;
-    --bg2:      #f7f7f7;
-    --bg3:      #f0f0f0;
-    --border:   #e5e5e5;
-    --border2:  #d4d4d4;
-    --text:     #111111;
-    --text2:    #666666;
-    --text3:    #999999;
-    --accent:   #111111;
-  }
+:root {
+  --bg:      #ffffff;
+  --bg2:     #f7f7f7;
+  --bg3:     #f0f0f0;
+  --border:  #e5e5e5;
+  --border2: #d4d4d4;
+  --text:    #111111;
+  --text2:   #555555;
+  --text3:   #999999;
+}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    min-height: 100vh;
-    font-size: 13px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
+html, body, #root { height: 100%; }
 
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* ── Markdown ── */
-  .md h1 { font-size: 1.15em; color: var(--text); margin: 1.2em 0 0.5em; font-weight: 700; }
-  .md h2 { font-size: 1em; color: var(--text); margin: 1em 0 0.4em; font-weight: 600; padding-bottom: 0.3em; border-bottom: 1px solid var(--border); }
-  .md h3 { font-size: 0.9em; color: var(--text); margin: 0.8em 0 0.3em; font-weight: 600; }
-  .md p { margin: 0.55em 0; color: var(--text2); }
-  .md ul, .md ol { margin: 0.4em 0; padding-left: 1.4em; }
-  .md li { margin: 0.25em 0; color: var(--text2); }
-  .md strong { color: var(--text); font-weight: 600; }
-  .md em { color: var(--text3); font-style: italic; }
-  .md code { background: var(--bg2); color: var(--text); padding: 0.1em 0.35em; border-radius: 3px; font-size: 0.85em; font-family: 'SF Mono', 'Fira Code', monospace; border: 1px solid var(--border); }
-  .md pre { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1em; overflow-x: auto; margin: 0.6em 0; }
-  .md pre code { background: none; border: none; padding: 0; }
-  .md blockquote { border-left: 2px solid var(--border2); padding-left: 1em; margin: 0.6em 0; color: var(--text3); }
-  .md table { width: 100%; border-collapse: collapse; margin: 0.8em 0; font-size: 0.9em; }
-  .md th { background: var(--bg2); padding: 0.45em 0.7em; text-align: left; border-bottom: 1px solid var(--border); color: var(--text); font-weight: 600; }
-  .md td { padding: 0.45em 0.7em; border-bottom: 1px solid var(--border); color: var(--text2); }
-  .md tr:hover td { background: var(--bg2); }
-  .md a { color: var(--text); text-decoration: underline; text-underline-offset: 2px; }
-  .md hr { border: none; border-top: 1px solid var(--border); margin: 1em 0; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
 
-  /* ── Animations ── */
-  @keyframes fadeIn  { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes spin    { to { transform: rotate(360deg); } }
-  @keyframes pulse   { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-  .fade-in { animation: fadeIn 0.2s ease-out; }
-  .spin    { animation: spin 0.8s linear infinite; }
-  .pulse   { animation: pulse 1.6s ease-in-out infinite; }
+/* ── Markdown ── */
+.md h1 { font-size: 1.1em; font-weight: 700; color: var(--text); margin: 1.1em 0 0.45em; }
+.md h2 { font-size: 1em; font-weight: 600; color: var(--text); margin: 0.9em 0 0.35em; padding-bottom: 0.3em; border-bottom: 1px solid var(--border); }
+.md h3 { font-size: 0.9em; font-weight: 600; color: var(--text); margin: 0.75em 0 0.3em; }
+.md p  { margin: 0.5em 0; color: var(--text2); }
+.md ul, .md ol { margin: 0.4em 0; padding-left: 1.4em; }
+.md li { margin: 0.2em 0; color: var(--text2); }
+.md strong { color: var(--text); font-weight: 600; }
+.md em { color: var(--text3); font-style: italic; }
+.md code { background: var(--bg2); color: var(--text); padding: 0.1em 0.3em; border-radius: 3px; font-size: 0.85em; font-family: 'SF Mono','Fira Code',monospace; border: 1px solid var(--border); }
+.md pre  { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 0.9em; overflow-x: auto; margin: 0.6em 0; }
+.md pre code { background: none; border: none; padding: 0; }
+.md blockquote { border-left: 2px solid var(--border2); padding-left: 1em; margin: 0.6em 0; color: var(--text3); }
+.md table { width: 100%; border-collapse: collapse; margin: 0.7em 0; font-size: 0.9em; }
+.md th { background: var(--bg2); padding: 0.4em 0.65em; text-align: left; border-bottom: 1px solid var(--border); font-weight: 600; }
+.md td { padding: 0.4em 0.65em; border-bottom: 1px solid var(--border); color: var(--text2); }
+.md tr:hover td { background: var(--bg2); }
+.md a  { color: var(--text); text-decoration: underline; text-underline-offset: 2px; }
+.md hr { border: none; border-top: 1px solid var(--border); margin: 1em 0; }
 
-  /* ── Layout ── */
-  .app { display: flex; flex-direction: column; min-height: 100vh; }
+/* ── Animations ── */
+@keyframes fadeIn { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:translateY(0); } }
+@keyframes spin   { to { transform: rotate(360deg); } }
+.fade-in { animation: fadeIn 0.18s ease-out; }
 
-  .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 20px; height: 48px;
-    background: var(--bg); border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 100;
-  }
+/* ── App shell ── */
+.app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-  .logo { display: flex; align-items: center; gap: 8px; }
-  .logo-mark {
-    width: 26px; height: 26px; border-radius: 5px;
-    background: var(--text); display: flex; align-items: center;
-    justify-content: center; font-size: 13px; color: #fff; font-weight: 700;
-    letter-spacing: -0.5px;
-  }
-  .logo-text  { font-weight: 600; font-size: 14px; color: var(--text); letter-spacing: -0.3px; }
-  .logo-slash { color: var(--border2); font-weight: 300; font-size: 16px; margin: 0 2px; }
-  .logo-sub   { font-size: 13px; color: var(--text3); }
+/* ── Top bar ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 48px; padding: 0 20px; flex-shrink: 0;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  position: relative; z-index: 10;
+}
+.logo { display: flex; align-items: center; gap: 8px; }
+.logo-mark {
+  width: 26px; height: 26px; border-radius: 5px;
+  background: var(--text); display: flex; align-items: center;
+  justify-content: center; font-size: 13px; color: #fff; font-weight: 700;
+}
+.logo-name { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -0.2px; }
+.logo-sep  { color: var(--border2); margin: 0 3px; font-weight: 300; font-size: 16px; }
+.logo-sub  { font-size: 12px; color: var(--text3); }
+.topbar-right { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text3); }
 
-  .main    { display: flex; flex: 1; }
-  .sidebar { width: 260px; min-width: 260px; border-right: 1px solid var(--border); background: var(--bg); overflow-y: auto; display: flex; flex-direction: column; }
-  .content { flex: 1; overflow-y: auto; padding: 28px 32px; background: var(--bg); }
-  .right-panel { width: 320px; min-width: 320px; border-left: 1px solid var(--border); background: var(--bg); overflow-y: auto; display: flex; flex-direction: column; }
+/* ── Main body ── */
+.main { display: flex; flex: 1; overflow: hidden; }
 
-  /* ── Sidebar sections ── */
-  .sidebar-section { padding: 16px; border-bottom: 1px solid var(--border); }
-  .sidebar-label {
-    font-size: 10px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.08em; color: var(--text3); margin-bottom: 8px;
-  }
+/* ── Left sidebar ── */
+.sidebar {
+  width: 232px; flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+}
+.sidebar-header {
+  padding: 16px 16px 10px;
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text3);
+  flex-shrink: 0;
+}
+.client-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px; cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background 0.1s;
+  position: relative;
+}
+.client-item:hover { background: var(--bg2); }
+.client-item.active { background: var(--bg2); border-left-color: var(--text); }
+.client-avatar {
+  width: 30px; height: 30px; border-radius: 5px; flex-shrink: 0;
+  background: var(--bg3); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; color: var(--text2);
+}
+.client-item.active .client-avatar { background: var(--text); color: #fff; border-color: var(--text); }
+.client-info { flex: 1; min-width: 0; }
+.client-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.client-industry { font-size: 11px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.client-mem-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text); flex-shrink: 0; }
 
-  /* ── Client list ── */
-  .client-item {
-    display: flex; align-items: center; gap: 9px;
-    padding: 8px 10px; border-radius: 4px; cursor: pointer;
-    transition: background 0.1s; margin-bottom: 1px;
-    border-left: 2px solid transparent;
-  }
-  .client-item:hover { background: var(--bg2); }
-  .client-item.selected { background: var(--bg2); border-left-color: var(--text); }
+.sidebar-footer {
+  margin-top: auto; padding: 12px 14px;
+  border-top: 1px solid var(--border); flex-shrink: 0;
+}
 
-  .client-initial {
-    width: 28px; height: 28px; border-radius: 4px; flex-shrink: 0;
-    background: var(--bg3); display: flex; align-items: center;
-    justify-content: center; font-size: 12px; font-weight: 600; color: var(--text2);
-  }
-  .client-item.selected .client-initial { background: var(--text); color: #fff; }
+/* ── Center workspace ── */
+.workspace {
+  flex: 1; overflow-y: auto;
+  padding: 0;
+  background: var(--bg);
+}
 
-  .client-name { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.3; }
-  .client-sub  { font-size: 11px; color: var(--text3); }
+/* ── Workspace header ── */
+.ws-header {
+  padding: 28px 36px 22px;
+  border-bottom: 1px solid var(--border);
+}
+.ws-client-label {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text3); margin-bottom: 6px;
+}
+.ws-title { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.4px; line-height: 1.2; }
+.ws-subtitle { font-size: 13px; color: var(--text3); margin-top: 4px; }
+.ws-meta { display: flex; align-items: center; gap: 16px; margin-top: 12px; }
+.ws-meta-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text2); }
+.ws-meta-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border2); }
 
-  .client-mem-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--text3); flex-shrink: 0; margin-left: auto;
-  }
-  .client-mem-dot.active { background: #111; }
+/* ── Section ── */
+.ws-section { padding: 0 36px 0; }
+.ws-section-title {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text3);
+  padding: 22px 0 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
 
-  /* ── Transcript list (inside expanded client) ── */
-  .transcript-block { padding: 4px 10px 10px 10px; }
-  .transcript-block-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 5px; padding-left: 2px; }
-  .transcript-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 5px 8px; border-radius: 3px; cursor: pointer;
-    transition: background 0.1s; font-size: 11.5px; color: var(--text2);
-    border-left: 2px solid transparent;
-  }
-  .transcript-row:hover { background: var(--bg3); color: var(--text); }
-  .transcript-row.selected { border-left-color: var(--text); background: var(--bg3); color: var(--text); font-weight: 500; }
-  .transcript-date { font-size: 10px; color: var(--text3); flex-shrink: 0; margin-left: 8px; }
+/* ── Transcript card ── */
+.tx-card {
+  border: 1px solid var(--border); border-radius: 5px;
+  margin: 12px 0; background: var(--bg); overflow: hidden;
+}
+.tx-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px;
+}
+.tx-card-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.tx-call-num {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--text3);
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 3px; padding: 2px 7px; flex-shrink: 0;
+}
+.tx-title { font-size: 13px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tx-date  { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.tx-card-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
-  /* ── Buttons (general) ── */
-  button { cursor: pointer; border: none; outline: none; font-family: inherit; background: none; }
+/* ── Outputs zone inside transcript card ── */
+.tx-outputs {
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
+  padding: 14px 16px;
+}
+.tx-outputs-label {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--text3); margin-bottom: 10px;
+}
+.tx-loading {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px; border-top: 1px solid var(--border);
+  background: var(--bg2); font-size: 12px; color: var(--text3);
+}
 
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
-    font-size: 12px; font-weight: 500; padding: 6px 12px;
-    border-radius: 4px; transition: background 0.1s, color 0.1s;
-  }
-  .btn-outline {
-    border: 1px solid var(--border); color: var(--text2); background: var(--bg);
-  }
-  .btn-outline:hover { background: var(--bg2); color: var(--text); }
+/* ── Other events section ── */
+.event-card {
+  border: 1px solid var(--border); border-radius: 5px;
+  margin: 12px 0; background: var(--bg); overflow: hidden;
+}
+.event-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px;
+}
+.event-card-left { flex: 1; min-width: 0; }
+.event-card-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.event-card-desc  { font-size: 11px; color: var(--text3); margin-top: 2px; }
 
-  .btn-solid {
-    background: var(--text); color: #fff; border: 1px solid var(--text);
-  }
-  .btn-solid:hover { background: #333; }
+/* ── Inline email preview ── */
+.email-banner {
+  border-top: 1px solid var(--border); background: var(--bg2);
+  padding: 10px 16px;
+}
+.email-banner-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 5px; }
+.email-banner-subject { font-size: 12px; font-weight: 500; color: var(--text); }
+.email-banner-from { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.email-banner-preview { font-size: 11.5px; color: var(--text2); margin-top: 6px; line-height: 1.6; }
 
-  .btn-ghost { color: var(--text2); }
-  .btn-ghost:hover { color: var(--text); background: var(--bg2); }
+/* ── Output panel ── */
+.output-panel {
+  border: 1px solid var(--border); border-radius: 4px;
+  background: var(--bg); margin-bottom: 8px; overflow: hidden;
+}
+.output-panel:last-child { margin-bottom: 0; }
+.output-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 13px; cursor: pointer; user-select: none;
+  transition: background 0.1s;
+}
+.output-head:hover { background: var(--bg3); }
+.output-head.open  { border-bottom: 1px solid var(--border); }
+.output-head-left  { display: flex; align-items: center; gap: 8px; }
+.output-type-tag {
+  font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--text3); border: 1px solid var(--border); border-radius: 3px; padding: 2px 5px;
+}
+.output-title { font-size: 12.5px; font-weight: 500; color: var(--text); }
+.output-chevron { font-size: 9px; color: var(--text3); flex-shrink: 0; }
+.output-body { padding: 16px 18px; max-height: 520px; overflow-y: auto; }
 
-  .btn-danger {
-    color: #999; font-size: 11px; padding: 4px 8px;
-    border-radius: 3px; border: 1px solid var(--border);
-  }
-  .btn-danger:hover { color: #c00; background: #fff0f0; border-color: #f5c6c6; }
+/* ── Buttons ── */
+button { cursor: pointer; font-family: inherit; border: none; outline: none; background: none; }
 
-  .btn-sm { padding: 4px 9px; font-size: 11px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 500; padding: 6px 12px; border-radius: 4px;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+.btn-solid   { background: var(--text); color: #fff; border: 1px solid var(--text); }
+.btn-solid:hover:not(:disabled) { background: #333; }
+.btn-outline { background: var(--bg); color: var(--text2); border: 1px solid var(--border); }
+.btn-outline:hover:not(:disabled) { background: var(--bg2); color: var(--text); border-color: var(--border2); }
+.btn-ghost   { color: var(--text2); padding: 5px 9px; border-radius: 3px; }
+.btn-ghost:hover:not(:disabled) { background: var(--bg2); color: var(--text); }
+.btn-danger  { color: var(--text3); font-size: 11px; padding: 3px 7px; border-radius: 3px; border: 1px solid var(--border); }
+.btn-danger:hover { color: #b00; background: #fff5f5; border-color: #f5c6c6; }
+.btn-sm { padding: 4px 9px; font-size: 11px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* ── Event trigger buttons ── */
-  .event-btn-row { display: flex; flex-direction: column; gap: 5px; }
-  .event-btn {
-    display: flex; align-items: center; gap: 10px;
-    padding: 9px 12px; border-radius: 4px; width: 100%;
-    border: 1px solid var(--border); background: var(--bg);
-    color: var(--text); font-size: 12px; font-weight: 500;
-    transition: background 0.1s, border-color 0.1s; text-align: left;
-  }
-  .event-btn:hover:not(:disabled) { background: var(--bg2); border-color: var(--border2); }
-  .event-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .event-btn.is-loading { background: var(--bg2); border-color: var(--border2); }
-  .event-btn-icon { font-size: 14px; flex-shrink: 0; }
-  .event-btn-text { flex: 1; }
-  .event-btn-label { font-weight: 500; font-size: 12px; color: var(--text); }
-  .event-btn-sub   { font-size: 10px; color: var(--text3); margin-top: 0; }
+/* ── Copy button ── */
+.copy-btn {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 11px;
+  padding: 2px 7px; border-radius: 3px; border: 1px solid var(--border);
+  color: var(--text3); transition: all 0.1s; background: var(--bg);
+}
+.copy-btn:hover { border-color: var(--border2); color: var(--text); background: var(--bg2); }
 
-  /* ── Output panels ── */
-  .output-panel { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 10px; background: var(--bg); }
-  .output-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 14px; cursor: pointer; background: var(--bg);
-    border-bottom: 1px solid transparent; transition: background 0.1s;
-    user-select: none;
-  }
-  .output-header:hover { background: var(--bg2); }
-  .output-header.open  { border-bottom-color: var(--border); }
-  .output-header-left  { display: flex; align-items: center; gap: 8px; }
-  .output-type-tag {
-    font-size: 10px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.07em; color: var(--text3);
-    padding: 2px 6px; border: 1px solid var(--border); border-radius: 3px;
-  }
-  .output-title { font-size: 13px; font-weight: 500; color: var(--text); }
-  .output-body  { padding: 18px 20px; overflow-y: auto; max-height: 560px; }
-  .output-chevron { font-size: 10px; color: var(--text3); flex-shrink: 0; }
+/* ── Status badge ── */
+.badge {
+  display: inline-flex; align-items: center; font-size: 10px; font-weight: 500;
+  padding: 2px 7px; border-radius: 3px; text-transform: capitalize;
+  background: var(--bg2); color: var(--text2); border: 1px solid var(--border);
+}
 
-  /* ── Status badge ── */
-  .status-badge {
-    display: inline-flex; align-items: center; font-size: 10px; font-weight: 500;
-    padding: 2px 7px; border-radius: 3px; text-transform: capitalize;
-    background: var(--bg2); color: var(--text2); border: 1px solid var(--border);
-  }
+/* ── Spinner ── */
+.spinner-sm {
+  display: inline-block; width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0;
+  border: 1.5px solid var(--border); border-top-color: var(--text);
+  animation: spin 0.7s linear infinite;
+}
+.spinner-md {
+  display: inline-block; width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid var(--border); border-top-color: var(--text);
+  animation: spin 0.7s linear infinite;
+}
 
-  /* ── Memory panel ── */
-  .memory-block { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
-  .memory-block-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 9px 12px; cursor: pointer; background: var(--bg);
-    transition: background 0.1s;
-  }
-  .memory-block-header:hover { background: var(--bg2); }
-  .memory-block-title { font-size: 12px; font-weight: 500; color: var(--text); }
-  .memory-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid var(--border); }
-  .memory-stat { padding: 8px 6px; text-align: center; border-right: 1px solid var(--border); }
-  .memory-stat:last-child { border-right: none; }
-  .memory-stat-val   { font-size: 15px; font-weight: 700; color: var(--text); }
-  .memory-stat-label { font-size: 10px; color: var(--text3); margin-top: 1px; }
-  .memory-body { padding: 12px; }
+/* ── Error bar ── */
+.error-bar {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 9px 13px; background: #fff5f5; border: 1px solid #fecaca;
+  border-radius: 4px; margin: 8px 0;
+}
+.error-bar-msg  { flex: 1; font-size: 12px; color: #c00; }
+.error-bar-close { color: var(--text3); cursor: pointer; font-size: 15px; line-height: 1; padding: 0; flex-shrink: 0; }
 
-  /* ── Loading ── */
-  .loading-state {
-    padding: 48px 24px; display: flex; flex-direction: column;
-    align-items: center; gap: 14px; text-align: center;
-  }
-  .spinner {
-    width: 24px; height: 24px; border-radius: 50%;
-    border: 2px solid var(--border);
-    border-top-color: var(--text);
-    animation: spin 0.8s linear infinite;
-  }
+/* ── Empty state ── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 100%; padding: 60px 40px;
+  text-align: center;
+}
+.empty-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.empty-desc  { font-size: 13px; color: var(--text3); max-width: 340px; line-height: 1.7; }
+.empty-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 24px; max-width: 400px; width: 100%; }
+.empty-card  { border: 1px solid var(--border); border-radius: 4px; padding: 13px; text-align: left; background: var(--bg); }
+.empty-card-t { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.empty-card-d { font-size: 11px; color: var(--text3); line-height: 1.5; }
 
-  /* ── Empty state ── */
-  .empty-state { padding: 64px 24px; text-align: center; }
-  .empty-state-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-  .empty-state-desc  { font-size: 13px; color: var(--text3); max-width: 380px; margin: 0 auto; line-height: 1.7; }
+/* ── Right panel ── */
+.right-panel {
+  width: 296px; flex-shrink: 0;
+  border-left: 1px solid var(--border);
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+}
+.rp-section { padding: 16px; border-bottom: 1px solid var(--border); }
+.rp-section:last-child { border-bottom: none; }
+.rp-label {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text3); margin-bottom: 10px;
+}
 
-  /* ── How-to grid ── */
-  .how-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-width: 420px; margin: 24px auto 0; }
-  .how-card {
-    border: 1px solid var(--border); border-radius: 4px;
-    padding: 14px; text-align: left; background: var(--bg);
-  }
-  .how-card-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-  .how-card-desc  { font-size: 11px; color: var(--text3); line-height: 1.55; }
+/* ── Memory panel ── */
+.mem-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.mem-stat { padding: 8px 4px; text-align: center; border-right: 1px solid var(--border); }
+.mem-stat:last-child { border-right: none; }
+.mem-stat-val  { font-size: 16px; font-weight: 700; color: var(--text); }
+.mem-stat-lbl  { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.mem-events { margin-top: 10px; }
+.mem-event-row {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 5px 0; border-bottom: 1px solid var(--border);
+  font-size: 11.5px;
+}
+.mem-event-row:last-child { border-bottom: none; }
+.mem-event-type { flex-shrink: 0; }
+.mem-event-summary { flex: 1; color: var(--text2); line-height: 1.4; }
+.mem-event-date { font-size: 10px; color: var(--text3); flex-shrink: 0; margin-top: 1px; }
+.mem-open-items { margin-top: 8px; }
+.mem-open-item { display: flex; align-items: flex-start; gap: 6px; font-size: 11.5px; color: var(--text2); padding: 3px 0; }
+.mem-open-dash { color: var(--text3); flex-shrink: 0; }
 
-  /* ── Chat ── */
-  .chat-area {
-    display: flex; flex-direction: column; height: 460px;
-    border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
-  }
-  .chat-title-bar {
-    padding: 9px 12px; border-bottom: 1px solid var(--border);
-    font-size: 11px; font-weight: 600; color: var(--text2);
-    background: var(--bg2); text-transform: uppercase; letter-spacing: 0.07em;
-  }
-  .chat-messages {
-    flex: 1; overflow-y: auto; padding: 12px;
-    display: flex; flex-direction: column; gap: 8px;
-  }
-  .chat-empty {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; height: 100%; gap: 14px; text-align: center;
-  }
-  .chat-suggestions { display: flex; flex-direction: column; gap: 4px; width: 100%; }
-  .chat-suggestion {
-    text-align: left; font-size: 11.5px; padding: 7px 10px; border-radius: 3px;
-    border: 1px solid var(--border); color: var(--text2); cursor: pointer;
-    transition: background 0.1s, color 0.1s; background: var(--bg);
-  }
-  .chat-suggestion:hover { background: var(--bg2); color: var(--text); }
+/* ── Chat ── */
+.chat-wrap {
+  display: flex; flex-direction: column; flex: 1;
+  border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+  min-height: 320px; max-height: 440px;
+}
+.chat-titlebar {
+  padding: 8px 11px; border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--text3); background: var(--bg2);
+}
+.chat-msgs {
+  flex: 1; overflow-y: auto; padding: 10px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.chat-empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 100%; gap: 12px; text-align: center;
+}
+.chat-suggestions { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.chat-suggestion {
+  text-align: left; font-size: 11.5px; padding: 6px 9px;
+  border-radius: 3px; border: 1px solid var(--border);
+  color: var(--text2); cursor: pointer; transition: all 0.1s; background: var(--bg);
+}
+.chat-suggestion:hover { background: var(--bg2); color: var(--text); }
+.msg { display: flex; }
+.msg.user { justify-content: flex-end; }
+.msg-bubble {
+  max-width: 86%; padding: 7px 10px; font-size: 12px; line-height: 1.5; border-radius: 4px;
+}
+.msg.user      .msg-bubble { background: var(--text); color: #fff; }
+.msg.assistant .msg-bubble { background: var(--bg2); color: var(--text); border: 1px solid var(--border); }
+.chat-input-row {
+  display: flex; gap: 5px; align-items: flex-end;
+  padding: 7px; border-top: 1px solid var(--border); background: var(--bg);
+}
+.chat-input {
+  flex: 1; resize: none; border-radius: 3px; padding: 6px 9px;
+  background: var(--bg2); border: 1px solid var(--border);
+  color: var(--text); font-size: 12px; font-family: inherit; outline: none;
+  min-height: 32px; max-height: 72px; transition: border-color 0.1s;
+}
+.chat-input:focus { border-color: var(--border2); }
+.chat-input::placeholder { color: var(--text3); }
+.chat-send {
+  width: 30px; height: 30px; border-radius: 3px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--text); color: #fff; font-size: 13px; transition: background 0.1s;
+}
+.chat-send:hover:not(:disabled) { background: #333; }
+.chat-send:disabled { background: var(--bg3); color: var(--text3); cursor: not-allowed; }
 
-  .msg { display: flex; gap: 8px; }
-  .msg.user { flex-direction: row-reverse; }
-  .msg-bubble {
-    max-width: 84%; padding: 8px 11px; font-size: 12.5px; line-height: 1.55;
-    border-radius: 4px;
-  }
-  .msg.user      .msg-bubble { background: var(--text);  color: #fff; }
-  .msg.assistant .msg-bubble { background: var(--bg2);   color: var(--text); border: 1px solid var(--border); }
+/* ── Insights panel ── */
+.insight-group { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.insight-group:last-child { border-bottom: none; }
+.insight-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 5px; }
+.insight-row { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px; font-size: 12px; color: var(--text2); }
+.insight-mark { flex-shrink: 0; color: var(--text3); font-size: 11px; margin-top: 1px; }
 
-  .chat-input-wrap { padding: 8px; border-top: 1px solid var(--border); display: flex; gap: 6px; align-items: flex-end; background: var(--bg); }
-  .chat-input {
-    flex: 1; resize: none; border-radius: 3px; padding: 7px 10px;
-    background: var(--bg2); border: 1px solid var(--border);
-    color: var(--text); font-size: 12.5px; font-family: inherit;
-    outline: none; max-height: 80px; min-height: 34px;
-    transition: border-color 0.1s;
-  }
-  .chat-input:focus { border-color: var(--border2); }
-  .chat-input::placeholder { color: var(--text3); }
-  .chat-send {
-    width: 32px; height: 32px; border-radius: 3px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--text); color: #fff; font-size: 13px;
-    transition: background 0.1s;
-  }
-  .chat-send:hover:not(:disabled) { background: #333; }
-  .chat-send:disabled { background: var(--bg3); color: var(--text3); cursor: not-allowed; }
-
-  /* ── Insights ── */
-  .insight-group { padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .insight-group:last-child { border-bottom: none; }
-  .insight-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 6px; }
-  .insight-row { display: flex; align-items: flex-start; gap: 7px; margin-bottom: 5px; font-size: 12px; color: var(--text2); }
-  .insight-mark { flex-shrink: 0; color: var(--text3); font-size: 11px; margin-top: 1px; }
-
-  /* ── Error ── */
-  .error-bar {
-    display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px;
-    background: #fff5f5; border: 1px solid #fecaca; border-radius: 4px;
-    margin-bottom: 14px;
-  }
-  .error-title { font-size: 12px; font-weight: 600; color: #c00; }
-  .error-msg   { font-size: 11.5px; color: var(--text2); margin-top: 2px; }
-  .error-close { margin-left: auto; color: var(--text3); cursor: pointer; font-size: 16px; padding: 0; flex-shrink: 0; line-height: 1; }
-
-  /* ── Context banners ── */
-  .context-banner {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 12px; background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 4px; margin-bottom: 12px; font-size: 12px; color: var(--text2);
-  }
-  .context-banner strong { color: var(--text); font-weight: 500; }
-
-  /* ── Email preview ── */
-  .email-preview {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 4px; padding: 12px 14px; margin-bottom: 12px;
-  }
-  .email-preview-label {
-    font-size: 10px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.07em; color: var(--text3); margin-bottom: 6px;
-  }
-  .email-preview-subject { font-size: 13px; font-weight: 500; color: var(--text); }
-  .email-preview-from    { font-size: 11.5px; color: var(--text3); margin-top: 2px; }
-  .email-preview-body    { font-size: 12px; color: var(--text2); margin-top: 7px; line-height: 1.6; }
-
-  /* ── Activity log ── */
-  .activity-row {
-    display: flex; align-items: center; gap: 9px;
-    padding: 7px 0; border-bottom: 1px solid var(--border);
-    font-size: 11.5px;
-  }
-  .activity-row:last-child { border-bottom: none; }
-  .activity-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
-
-  /* ── Steps ── */
-  .steps { display: flex; flex-direction: column; gap: 10px; }
-  .step  { display: flex; gap: 10px; align-items: flex-start; }
-  .step-num {
-    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
-    border: 1px solid var(--border); background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 600; color: var(--text3);
-  }
-  .step-title { font-size: 12px; font-weight: 500; color: var(--text); }
-  .step-desc  { font-size: 11px; color: var(--text3); margin-top: 1px; line-height: 1.5; }
-
-  /* ── Copy btn ── */
-  .copy-btn {
-    display: inline-flex; align-items: center; gap: 4px; font-size: 11px;
-    padding: 3px 7px; border-radius: 3px; border: 1px solid var(--border);
-    color: var(--text3); cursor: pointer; transition: all 0.1s; background: var(--bg);
-  }
-  .copy-btn:hover { border-color: var(--border2); color: var(--text); background: var(--bg2); }
-
-  /* ── Output History ── */
-  .history-list { display: flex; flex-direction: column; }
-  .history-row {
-    display: flex; align-items: center; gap: 9px;
-    padding: 7px 8px; border-radius: 3px; cursor: pointer;
-    transition: background 0.1s; border-left: 2px solid transparent;
-  }
-  .history-row:hover { background: var(--bg2); }
-  .history-row.active { background: var(--bg2); border-left-color: var(--text); }
-  .history-row-type {
-    font-size: 9px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.06em; color: var(--text3);
-    border: 1px solid var(--border); border-radius: 2px;
-    padding: 1px 5px; flex-shrink: 0; white-space: nowrap;
-  }
-  .history-row-title {
-    font-size: 12px; color: var(--text); flex: 1;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .history-row-date { font-size: 10px; color: var(--text3); flex-shrink: 0; }
-  .history-filter-row {
-    display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;
-  }
-  .filter-btn {
-    font-size: 10px; padding: 3px 8px; border-radius: 3px;
-    border: 1px solid var(--border); color: var(--text3);
-    cursor: pointer; transition: all 0.1s; background: var(--bg);
-  }
-  .filter-btn:hover  { background: var(--bg2); color: var(--text); }
-  .filter-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
-
-  /* ── Misc ── */
-  .divider { height: 1px; background: var(--border); margin: 12px 0; }
-  .topbar-client {
-    display: flex; align-items: center; gap: 6px; font-size: 12px;
-    color: var(--text2); font-weight: 500;
-  }
-  .topbar-client-dot {
-    width: 20px; height: 20px; border-radius: 3px; background: var(--bg2);
-    border: 1px solid var(--border); display: flex; align-items: center;
-    justify-content: center; font-size: 11px; font-weight: 600; color: var(--text);
-  }
-  .page-title { font-size: 17px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; line-height: 1.3; }
-  .page-sub   { font-size: 12px; color: var(--text3); margin-top: 3px; }
+/* ── Misc ── */
+.divider { height: 1px; background: var(--border); margin: 10px 0; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback } = React;
-const API = '';
 
-// ─── API helpers ─────────────────────────────────────────────
+// ── API ──────────────────────────────────────────────────────────
 async function apiFetch(path, opts = {}) {
-  const res = await fetch(API + path, {
+  const res = await fetch(path, {
     headers: { 'Content-Type': 'application/json' },
     ...opts,
   });
@@ -439,281 +426,26 @@ async function apiFetch(path, opts = {}) {
   return res.json();
 }
 
-// ─── Markdown renderer ───────────────────────────────────────
-function Markdown({ content }) {
-  const html = marked.parse(content || '', { breaks: true });
+// ── Markdown ─────────────────────────────────────────────────────
+function MD({ src }) {
+  const html = marked.parse(src || '', { breaks: true });
   return <div className="md" dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-// ─── Copy button ─────────────────────────────────────────────
+// ── Copy button ───────────────────────────────────────────────────
 function CopyBtn({ text }) {
-  const [copied, setCopied] = useState(false);
-  const copy = (e) => {
+  const [ok, setOk] = useState(false);
+  const go = e => {
     e.stopPropagation();
     navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setOk(true);
+    setTimeout(() => setOk(false), 1800);
   };
-  return (
-    <button className="copy-btn" onClick={copy}>
-      {copied ? '✓ Copied' : 'Copy'}
-    </button>
-  );
+  return <button className="copy-btn" onClick={go}>{ok ? '✓ Copied' : 'Copy'}</button>;
 }
 
-// ─── Output Panel ────────────────────────────────────────────
-const OUTPUT_CONFIG = {
-  email:           { tag: 'Email',           label: 'Follow-up Email'      },
-  proposal:        { tag: 'Proposal',        label: 'Proposal Document'    },
-  team_plan:       { tag: 'Team Plan',       label: 'Internal Team Plan'   },
-  meeting_prep:    { tag: 'Meeting Prep',    label: 'Pre-Meeting Briefing' },
-  research_report: { tag: 'Research',        label: 'Research Report'      },
-  email_reply:     { tag: 'Email Reply',     label: 'Email Response Draft' },
-};
-
-function OutputPanel({ output, defaultOpen = true }) {
-  const [open, setOpen] = useState(defaultOpen);
-  const cfg = OUTPUT_CONFIG[output.type] || OUTPUT_CONFIG.email;
-  return (
-    <div className="output-panel fade-in">
-      <div className={`output-header ${open ? 'open' : ''}`} onClick={() => setOpen(!open)}>
-        <div className="output-header-left">
-          <span className="output-type-tag">{cfg.tag}</span>
-          <span className="output-title">{output.title || cfg.label}</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {open && <CopyBtn text={output.content} />}
-          <span className="output-chevron">{open ? '▲' : '▼'}</span>
-        </div>
-      </div>
-      {open && (
-        <div className="output-body">
-          <Markdown content={output.content} />
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Memory Panel ─────────────────────────────────────────────
-function MemoryPanel({ memory }) {
-  const [open, setOpen] = useState(false);
-  if (!memory) {
-    return (
-      <div style={{ padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--text3)', fontSize: 12 }}>
-        No memory yet — trigger an event to build context.
-      </div>
-    );
-  }
-  const openItems = (memory.open_items || []).filter(i => !i.resolved);
-  return (
-    <div className="memory-block">
-      <div className="memory-block-header" onClick={() => setOpen(!open)}>
-        <span className="memory-block-title">Project Memory</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span className="status-badge">{memory.project_status}</span>
-          <span style={{ fontSize: 10, color: 'var(--text3)' }}>{open ? '▲' : '▼'}</span>
-        </div>
-      </div>
-      <div className="memory-stats">
-        {[
-          { label: 'Events',     val: (memory.events || []).length },
-          { label: 'Open Items', val: openItems.length },
-          { label: 'Decisions',  val: (memory.decisions || []).length },
-        ].map(s => (
-          <div className="memory-stat" key={s.label}>
-            <div className="memory-stat-val">{s.val}</div>
-            <div className="memory-stat-label">{s.label}</div>
-          </div>
-        ))}
-      </div>
-      {open && (
-        <div className="memory-body fade-in">
-          {(memory.events || []).length > 0 && (
-            <div style={{ marginBottom: 10 }}>
-              <div className="insight-label">Recent Events</div>
-              {[...(memory.events || [])].reverse().slice(0, 5).map((e, i) => (
-                <div key={i} className="insight-row">
-                  <span className="status-badge" style={{ fontSize: 9 }}>{e.type}</span>
-                  <span style={{ flex: 1 }}>{e.summary}</span>
-                  <span style={{ color: 'var(--text3)', fontSize: 10, flexShrink: 0 }}>{(e.timestamp || '').slice(0, 10)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          {openItems.length > 0 && (
-            <div style={{ marginBottom: 10 }}>
-              <div className="insight-label">Open Items</div>
-              {openItems.slice(0, 8).map((item, i) => (
-                <div key={i} className="insight-row">
-                  <span className="insight-mark">–</span>
-                  <span>{item.item}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          {memory.extra_context && (
-            <div>
-              <div className="insight-label">Latest Context</div>
-              <p style={{ fontSize: 11.5, color: 'var(--text2)', lineHeight: 1.6 }}>{memory.extra_context}</p>
-            </div>
-          )}
-          <div style={{ marginTop: 10, fontSize: 10, color: 'var(--text3)' }}>
-            Updated {(memory.last_updated || '').slice(0, 16).replace('T', ' ')} UTC
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Chat Panel ───────────────────────────────────────────────
-function ChatPanel({ clientId, companyName }) {
-  const [msgs, setMsgs] = useState([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const bottomRef = useRef(null);
-  const inputRef = useRef(null);
-
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [msgs]);
-
-  const send = async (text) => {
-    const t = (text || input).trim();
-    if (!t || loading) return;
-    const newMsgs = [...msgs, { role: 'user', content: t }];
-    setMsgs(newMsgs);
-    setInput('');
-    setLoading(true);
-    try {
-      const data = await apiFetch('/api/chat', {
-        method: 'POST',
-        body: JSON.stringify({ client_id: clientId, messages: newMsgs }),
-      });
-      setMsgs([...newMsgs, { role: 'assistant', content: data.response }]);
-    } catch (e) {
-      setMsgs([...newMsgs, { role: 'assistant', content: `Error: ${e.message}` }]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const SUGGESTIONS = [
-    'What are the open action items?',
-    'What risks should I watch?',
-    'Summarize project status',
-    'What to prep for next meeting?',
-  ];
-
-  return (
-    <div className="chat-area">
-      <div className="chat-title-bar">Chat — {companyName}</div>
-      <div className="chat-messages">
-        {msgs.length === 0 ? (
-          <div className="chat-empty">
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>Ask about {companyName}</div>
-              <div style={{ fontSize: 11.5, color: 'var(--text3)' }}>I have full project context</div>
-            </div>
-            <div className="chat-suggestions">
-              {SUGGESTIONS.map(q => (
-                <button key={q} className="chat-suggestion" onClick={() => send(q)}>{q}</button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          msgs.map((m, i) => (
-            <div key={i} className={`msg ${m.role}`}>
-              <div className="msg-bubble">
-                {m.role === 'assistant' ? <Markdown content={m.content} /> : m.content}
-              </div>
-            </div>
-          ))
-        )}
-        {loading && (
-          <div className="msg assistant">
-            <div className="msg-bubble">
-              <span className="spin" style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid var(--border)', borderTopColor: 'var(--text)', borderRadius: '50%' }}></span>
-            </div>
-          </div>
-        )}
-        <div ref={bottomRef} />
-      </div>
-      <div className="chat-input-wrap">
-        <textarea
-          ref={inputRef}
-          className="chat-input"
-          placeholder="Ask about this engagement… (Enter to send)"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
-          rows={1}
-          onInput={e => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 80) + 'px'; }}
-        />
-        <button className="chat-send" disabled={!input.trim() || loading} onClick={() => send()}>↑</button>
-      </div>
-    </div>
-  );
-}
-
-// ─── Insights panel ───────────────────────────────────────────
-function InsightsPanel({ insights }) {
-  if (!insights) return null;
-  return (
-    <div style={{ border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
-      {insights.client_sentiment && (
-        <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>
-          <div className="insight-label">Client Sentiment</div>
-          <span className="status-badge">{insights.client_sentiment}</span>
-        </div>
-      )}
-      {(insights.decisions || []).length > 0 && (
-        <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>
-          <div className="insight-label">Decisions Made</div>
-          {(insights.decisions || []).slice(0, 4).map((d, i) => (
-            <div key={i} className="insight-row">
-              <span className="insight-mark">✓</span>
-              <span>{d}</span>
-            </div>
-          ))}
-        </div>
-      )}
-      {(insights.action_items || []).length > 0 && (
-        <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>
-          <div className="insight-label">Action Items</div>
-          {(insights.action_items || []).slice(0, 4).map((a, i) => (
-            <div key={i} className="insight-row">
-              <span className="insight-mark">→</span>
-              <span>
-                <strong style={{ color: 'var(--text)', fontWeight: 500 }}>{a.owner}:</strong>{' '}{a.task}
-                {a.due && <span style={{ color: 'var(--text3)', marginLeft: 4 }}>({a.due})</span>}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-      {(insights.key_risks || []).length > 0 && (
-        <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>
-          <div className="insight-label">Risks</div>
-          {(insights.key_risks || []).slice(0, 4).map((r, i) => (
-            <div key={i} className="insight-row">
-              <span className="insight-mark">!</span>
-              <span>{r}</span>
-            </div>
-          ))}
-        </div>
-      )}
-      {insights.summary && (
-        <div style={{ padding: '10px 12px' }}>
-          <div className="insight-label">Summary</div>
-          <p style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.6 }}>{insights.summary}</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Output History Panel ───────────────────────────────────────
-const OUTPUT_TYPE_LABELS = {
+// ── Output panel (collapsible) ────────────────────────────────────
+const OUTPUT_TAG = {
   email:           'Email',
   proposal:        'Proposal',
   team_plan:       'Team Plan',
@@ -722,112 +454,540 @@ const OUTPUT_TYPE_LABELS = {
   email_reply:     'Email Reply',
 };
 
-const FILTERS = [
-  { key: 'all',      label: 'All' },
-  { key: 'email',    label: 'Emails' },
-  { key: 'proposal', label: 'Proposals' },
-  { key: 'team_plan', label: 'Plans' },
-];
-
-function formatDate(iso) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-}
-
-function HistoryPanel({ clientId, onOpen, activeId }) {
-  const [outputs, setOutputs] = useState([]);
-  const [filter, setFilter]   = useState('all');
-  const [loading, setLoading] = useState(false);
-
-  const load = useCallback(async () => {
-    if (!clientId) { setOutputs([]); return; }
-    setLoading(true);
-    try {
-      const d = await apiFetch(`/api/clients/${clientId}/outputs`);
-      setOutputs(d.outputs || []);
-    } catch { setOutputs([]); }
-    finally { setLoading(false); }
-  }, [clientId]);
-
-  useEffect(() => { load(); }, [load]);
-
-  // Expose reload so parent can call it after a new event
-  HistoryPanel._reload = load;
-
-  const visible = filter === 'all'
-    ? outputs
-    : outputs.filter(o => {
-        if (filter === 'email') return o.type === 'email' || o.type === 'email_reply';
-        return o.type === filter;
-      });
-
-  if (!clientId) return (
-    <div style={{ padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--text3)', fontSize: 12 }}>
-      Select a client to see their output history.
-    </div>
-  );
-
+function OutputPanel({ output, defaultOpen = true }) {
+  const [open, setOpen] = useState(defaultOpen);
+  const tag = OUTPUT_TAG[output.type] || output.type;
+  // Strip leading emoji from title for clean display
+  const cleanTitle = (output.title || '').replace(/^[\u{1F300}-\u{1FFFF}\u2600-\u27FF\s]+/u, '').trim() || tag;
   return (
-    <div>
-      <div className="history-filter-row">
-        {FILTERS.map(f => (
-          <button
-            key={f.key}
-            className={`filter-btn ${filter === f.key ? 'active' : ''}`}
-            onClick={() => setFilter(f.key)}
-          >{f.label}</button>
-        ))}
+    <div className="output-panel fade-in">
+      <div className={`output-head ${open ? 'open' : ''}`} onClick={() => setOpen(o => !o)}>
+        <div className="output-head-left">
+          <span className="output-type-tag">{tag}</span>
+          <span className="output-title">{cleanTitle}</span>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+          {open && <CopyBtn text={output.content} />}
+          <span className="output-chevron">{open ? '▲' : '▼'}</span>
+        </div>
       </div>
-      {loading && (
-        <div style={{ fontSize: 11.5, color: 'var(--text3)', padding: '8px 0' }}>Loading…</div>
-      )}
-      {!loading && visible.length === 0 && (
-        <div style={{ fontSize: 11.5, color: 'var(--text3)', padding: '4px 0' }}>
-          {outputs.length === 0 ? 'No outputs yet — trigger an event to generate.' : 'No outputs match this filter.'}
+      {open && (
+        <div className="output-body">
+          <MD src={output.content} />
         </div>
       )}
-      <div className="history-list">
-        {visible.map(o => (
-          <div
-            key={o.id}
-            className={`history-row ${activeId === o.id ? 'active' : ''}`}
-            onClick={() => onOpen(o)}
+    </div>
+  );
+}
+
+// ── Transcript card ───────────────────────────────────────────────
+function TranscriptCard({ transcript, index, clientId, disabled, onOutputsGenerated }) {
+  const [loading, setLoading]   = useState(false);
+  const [outputs, setOutputs]   = useState([]);   // outputs for THIS transcript
+  const [error, setError]       = useState(null);
+  const [insights, setInsights] = useState(null);
+  const hasOutputs = outputs.length > 0;
+
+  const run = async () => {
+    if (loading || disabled) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await apiFetch('/api/events/transcript', {
+        method: 'POST',
+        body: JSON.stringify({ client_id: clientId, transcript_id: transcript.id }),
+      });
+      const generated = Object.values(res.outputs || {});
+      setOutputs(generated);
+      if (res.insights) setInsights(res.insights);
+      if (onOutputsGenerated) onOutputsGenerated(res.insights);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="tx-card fade-in">
+      {/* Header row */}
+      <div className="tx-card-head">
+        <div className="tx-card-left">
+          <span className="tx-call-num">Call {index + 1}</span>
+          <div>
+            <div className="tx-title">{transcript.title}</div>
+            <div className="tx-date">{transcript.date}</div>
+          </div>
+        </div>
+        <div className="tx-card-right">
+          {hasOutputs && <span className="badge">{outputs.length} output{outputs.length !== 1 ? 's' : ''}</span>}
+          <button
+            className="btn btn-solid btn-sm"
+            disabled={loading || disabled}
+            onClick={run}
           >
-            <span className="history-row-type">{OUTPUT_TYPE_LABELS[o.type] || o.type}</span>
-            <span className="history-row-title">{o.title.replace(/^[^a-zA-Z]+/, '')}</span>
-            <span className="history-row-date">{formatDate(o.created_at)}</span>
+            {loading ? <><span className="spinner-sm" /> Running…</> : 'Run'}
+          </button>
+        </div>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div style={{ padding: '0 16px 12px' }}>
+          <div className="error-bar">
+            <span className="error-bar-msg">{error}</span>
+            <button className="error-bar-close" onClick={() => setError(null)}>×</button>
+          </div>
+        </div>
+      )}
+
+      {/* Loading indicator */}
+      {loading && (
+        <div className="tx-loading">
+          <span className="spinner-sm" />
+          <span>Analyzing transcript, extracting insights, generating outputs…</span>
+        </div>
+      )}
+
+      {/* Outputs zone */}
+      {!loading && hasOutputs && (
+        <div className="tx-outputs fade-in">
+          <div className="tx-outputs-label">Generated outputs</div>
+          {outputs.map((o, i) => (
+            <OutputPanel key={i} output={o} defaultOpen={i === 0} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Event card (meeting / email) ──────────────────────────────────
+function EventCard({ title, desc, clientId, eventType, clientEmail, disabled, onOutputsGenerated }) {
+  const [loading, setLoading] = useState(false);
+  const [outputs, setOutputs] = useState([]);
+  const [error, setError]     = useState(null);
+  const [incomingEmail, setIncomingEmail] = useState(null);
+  const hasOutputs = outputs.length > 0;
+
+  const run = async () => {
+    if (loading || disabled) return;
+    setLoading(true);
+    setError(null);
+    try {
+      let res;
+      if (eventType === 'meeting') {
+        res = await apiFetch('/api/events/meeting', {
+          method: 'POST',
+          body: JSON.stringify({ client_id: clientId }),
+        });
+      } else {
+        res = await apiFetch('/api/events/email', {
+          method: 'POST',
+          body: JSON.stringify({ client_id: clientId }),
+        });
+        if (res.incoming_email) setIncomingEmail(res.incoming_email);
+      }
+      setOutputs(Object.values(res.outputs || {}));
+      if (onOutputsGenerated) onOutputsGenerated();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="event-card fade-in">
+      <div className="event-card-head">
+        <div className="event-card-left">
+          <div className="event-card-title">{title}</div>
+          <div className="event-card-desc">{desc}</div>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0, marginLeft:12 }}>
+          {hasOutputs && <span className="badge">{outputs.length} output{outputs.length !== 1 ? 's' : ''}</span>}
+          <button
+            className="btn btn-outline btn-sm"
+            disabled={loading || disabled}
+            onClick={run}
+          >
+            {loading ? <><span className="spinner-sm" /> Running…</> : 'Run'}
+          </button>
+        </div>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div style={{ padding: '0 16px 12px' }}>
+          <div className="error-bar">
+            <span className="error-bar-msg">{error}</span>
+            <button className="error-bar-close" onClick={() => setError(null)}>×</button>
+          </div>
+        </div>
+      )}
+
+      {/* Incoming email preview */}
+      {!loading && incomingEmail && (
+        <div className="email-banner">
+          <div className="email-banner-label">Incoming email</div>
+          <div className="email-banner-subject">{incomingEmail.subject}</div>
+          <div className="email-banner-from">From: {incomingEmail.from}</div>
+          {incomingEmail.preview && (
+            <div className="email-banner-preview">{incomingEmail.preview}</div>
+          )}
+        </div>
+      )}
+
+      {/* Loading */}
+      {loading && (
+        <div className="tx-loading">
+          <span className="spinner-sm" />
+          <span>
+            {eventType === 'meeting'
+              ? 'Checking project memory, preparing briefing…'
+              : 'Reading email, checking context, drafting response…'}
+          </span>
+        </div>
+      )}
+
+      {/* Outputs */}
+      {!loading && hasOutputs && (
+        <div className="tx-outputs fade-in">
+          <div className="tx-outputs-label">Generated outputs</div>
+          {outputs.map((o, i) => (
+            <OutputPanel key={i} output={o} defaultOpen={i === 0} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Memory panel ──────────────────────────────────────────────────
+function MemoryPanel({ memory, onReset }) {
+  const [open, setOpen] = useState(false);
+  if (!memory) {
+    return (
+      <div style={{ fontSize:12, color:'var(--text3)', padding:'4px 0', lineHeight:1.6 }}>
+        No memory yet. Run a transcript or event to build project context.
+      </div>
+    );
+  }
+  const openItems = (memory.open_items || []).filter(i => !i.resolved);
+  return (
+    <div>
+      <div className="mem-stats">
+        {[
+          { label:'Events',     val:(memory.events||[]).length },
+          { label:'Open Items', val:openItems.length },
+          { label:'Decisions',  val:(memory.decisions||[]).length },
+        ].map(s => (
+          <div className="mem-stat" key={s.label}>
+            <div className="mem-stat-val">{s.val}</div>
+            <div className="mem-stat-lbl">{s.label}</div>
           </div>
         ))}
       </div>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:10 }}>
+        <span className="badge" style={{ textTransform:'capitalize' }}>{memory.project_status || 'discovery'}</span>
+        <button
+          style={{ display:'flex', alignItems:'center', gap:4, fontSize:11, color:'var(--text3)', cursor:'pointer' }}
+          onClick={() => setOpen(o => !o)}
+        >
+          {open ? 'Hide details ▲' : 'Show details ▼'}
+        </button>
+      </div>
+      {open && (
+        <div className="fade-in" style={{ marginTop:10 }}>
+          {(memory.events||[]).length > 0 && (
+            <div className="mem-events">
+              <div style={{ fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.08em', color:'var(--text3)', marginBottom:5 }}>Recent Events</div>
+              {[...(memory.events||[])].reverse().slice(0,5).map((e,i)=>(
+                <div key={i} className="mem-event-row">
+                  <span className="mem-event-type"><span className="badge" style={{fontSize:9}}>{e.type}</span></span>
+                  <span className="mem-event-summary">{e.summary}</span>
+                  <span className="mem-event-date">{(e.timestamp||'').slice(0,10)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {openItems.length > 0 && (
+            <div className="mem-open-items" style={{ marginTop:8 }}>
+              <div style={{ fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.08em', color:'var(--text3)', marginBottom:5 }}>Open Items</div>
+              {openItems.slice(0,8).map((item,i)=>(
+                <div key={i} className="mem-open-item">
+                  <span className="mem-open-dash">–</span>
+                  <span>{item.item}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {memory.extra_context && (
+            <div style={{ marginTop:8 }}>
+              <div style={{ fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.08em', color:'var(--text3)', marginBottom:4 }}>Latest Context</div>
+              <p style={{ fontSize:11.5, color:'var(--text2)', lineHeight:1.6 }}>{memory.extra_context}</p>
+            </div>
+          )}
+          <div style={{ marginTop:8, fontSize:10, color:'var(--text3)' }}>
+            Updated {(memory.last_updated||'').slice(0,16).replace('T',' ')} UTC
+          </div>
+        </div>
+      )}
+      {onReset && (
+        <div style={{ marginTop:10 }}>
+          <button className="btn-danger" onClick={onReset}>Reset memory</button>
+        </div>
+      )}
     </div>
   );
 }
 
-// ─── Spinner inline ───────────────────────────────────────────
-function InlineSpinner() {
+// ── Chat panel ────────────────────────────────────────────────────
+function ChatPanel({ clientId, companyName }) {
+  const [msgs, setMsgs]       = useState([]);
+  const [input, setInput]     = useState('');
+  const [loading, setLoading] = useState(false);
+  const bottomRef = useRef(null);
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:'smooth' }); }, [msgs]);
+
+  const send = async (text) => {
+    const t = (text || input).trim();
+    if (!t || loading) return;
+    const newMsgs = [...msgs, { role:'user', content:t }];
+    setMsgs(newMsgs);
+    setInput('');
+    setLoading(true);
+    try {
+      const data = await apiFetch('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify({ client_id: clientId, messages: newMsgs }),
+      });
+      setMsgs([...newMsgs, { role:'assistant', content: data.response }]);
+    } catch (e) {
+      setMsgs([...newMsgs, { role:'assistant', content:`Error: ${e.message}` }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const SUGGESTIONS = [
+    'What are the open action items?',
+    'What risks should I watch for?',
+    'Summarize the project status',
+    'What should I prep for the next call?',
+  ];
+
   return (
-    <span className="spin" style={{
-      display: 'inline-block', width: 13, height: 13, borderRadius: '50%',
-      border: '1.5px solid var(--border)', borderTopColor: 'var(--text)',
-    }}></span>
+    <div className="chat-wrap">
+      <div className="chat-titlebar">Chat — {companyName}</div>
+      <div className="chat-msgs">
+        {msgs.length === 0 ? (
+          <div className="chat-empty-state">
+            <div>
+              <div style={{ fontSize:12.5, fontWeight:600, color:'var(--text)', marginBottom:2 }}>Ask about {companyName}</div>
+              <div style={{ fontSize:11.5, color:'var(--text3)' }}>Full project context available</div>
+            </div>
+            <div className="chat-suggestions">
+              {SUGGESTIONS.map(q => (
+                <button key={q} className="chat-suggestion" onClick={() => send(q)}>{q}</button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          msgs.map((m,i) => (
+            <div key={i} className={`msg ${m.role}`}>
+              <div className="msg-bubble">
+                {m.role === 'assistant' ? <MD src={m.content} /> : m.content}
+              </div>
+            </div>
+          ))
+        )}
+        {loading && (
+          <div className="msg assistant">
+            <div className="msg-bubble">
+              <span className="spinner-sm" />
+            </div>
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+      <div className="chat-input-row">
+        <textarea
+          className="chat-input"
+          placeholder="Ask anything about this engagement…"
+          value={input}
+          rows={1}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send(); }}}
+          onInput={e => { e.target.style.height='auto'; e.target.style.height = Math.min(e.target.scrollHeight,72)+'px'; }}
+        />
+        <button className="chat-send" disabled={!input.trim()||loading} onClick={() => send()}>↑</button>
+      </div>
+    </div>
   );
 }
 
-// ─── Main App ─────────────────────────────────────────────────
+// ── Insights panel ────────────────────────────────────────────────
+function InsightsPanel({ insights }) {
+  if (!insights) return null;
+  return (
+    <div style={{ border:'1px solid var(--border)', borderRadius:4, overflow:'hidden', marginTop:8 }}>
+      {insights.client_sentiment && (
+        <div className="insight-group" style={{ padding:'8px 12px' }}>
+          <div className="insight-label">Client Sentiment</div>
+          <span className="badge">{insights.client_sentiment}</span>
+        </div>
+      )}
+      {(insights.decisions||[]).length > 0 && (
+        <div className="insight-group" style={{ padding:'8px 12px' }}>
+          <div className="insight-label">Decisions Made</div>
+          {insights.decisions.slice(0,4).map((d,i)=>(
+            <div key={i} className="insight-row"><span className="insight-mark">✓</span><span>{d}</span></div>
+          ))}
+        </div>
+      )}
+      {(insights.action_items||[]).length > 0 && (
+        <div className="insight-group" style={{ padding:'8px 12px' }}>
+          <div className="insight-label">Action Items</div>
+          {insights.action_items.slice(0,4).map((a,i)=>(
+            <div key={i} className="insight-row">
+              <span className="insight-mark">→</span>
+              <span><strong style={{color:'var(--text)',fontWeight:500}}>{a.owner}:</strong> {a.task}
+                {a.due && <span style={{color:'var(--text3)',marginLeft:4}}>({a.due})</span>}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      {(insights.key_risks||[]).length > 0 && (
+        <div className="insight-group" style={{ padding:'8px 12px' }}>
+          <div className="insight-label">Risks</div>
+          {insights.key_risks.slice(0,3).map((r,i)=>(
+            <div key={i} className="insight-row"><span className="insight-mark">!</span><span>{r}</span></div>
+          ))}
+        </div>
+      )}
+      {insights.summary && (
+        <div className="insight-group" style={{ padding:'8px 12px', borderBottom:'none' }}>
+          <div className="insight-label">Summary</div>
+          <p style={{ fontSize:11.5, color:'var(--text2)', lineHeight:1.6 }}>{insights.summary}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Client workspace ──────────────────────────────────────────────
+function Workspace({ client, memory, onMemoryChange }) {
+  const [latestInsights, setLatestInsights] = useState(null);
+  const [showChat, setShowChat]             = useState(false);
+  const attendeeCount = (client.attendees || []).length;
+  const augusta       = client.augusta_team || [];
+
+  const handleOutputsGenerated = useCallback((insights) => {
+    if (insights) setLatestInsights(insights);
+    onMemoryChange();
+  }, [onMemoryChange]);
+
+  return (
+    <>
+      {/* ── Workspace header ── */}
+      <div className="ws-header">
+        <div className="ws-client-label">Client Workspace</div>
+        <div className="ws-title">{client.company_name} Engagement</div>
+        <div className="ws-subtitle">{client.industry}</div>
+        <div className="ws-meta">
+          <div className="ws-meta-item">
+            <div className="ws-meta-dot" />
+            <span>{client.client_name}</span>
+          </div>
+          {attendeeCount > 0 && (
+            <div className="ws-meta-item">
+              <div className="ws-meta-dot" />
+              <span>{attendeeCount} attendee{attendeeCount !== 1 ? 's' : ''}</span>
+            </div>
+          )}
+          {augusta.length > 0 && (
+            <div className="ws-meta-item">
+              <div className="ws-meta-dot" />
+              <span>Augusta team: {augusta.length}</span>
+            </div>
+          )}
+          {memory && (
+            <div className="ws-meta-item">
+              <div className="ws-meta-dot" />
+              <span className="badge" style={{ fontSize:10 }}>{memory.project_status || 'discovery'}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Calls / Transcripts ── */}
+      <div className="ws-section">
+        <div className="ws-section-title">
+          <span>Calls &amp; Transcripts</span>
+          <span style={{ fontSize:11, color:'var(--text3)', textTransform:'none', letterSpacing:0, fontWeight:400 }}>
+            {client.transcripts.length} call{client.transcripts.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+
+        {client.transcripts.length === 0 ? (
+          <div style={{ padding:'18px 0', fontSize:12, color:'var(--text3)' }}>No transcripts available.</div>
+        ) : (
+          client.transcripts.map((tx, i) => (
+            <TranscriptCard
+              key={tx.id}
+              transcript={tx}
+              index={i}
+              clientId={client.client_id}
+              disabled={false}
+              onOutputsGenerated={handleOutputsGenerated}
+            />
+          ))
+        )}
+      </div>
+
+      {/* ── Other Events ── */}
+      <div className="ws-section" style={{ paddingBottom: 40 }}>
+        <div className="ws-section-title">
+          <span>Other Events</span>
+        </div>
+
+        <EventCard
+          title="Meeting in 3 hours"
+          desc={memory
+            ? "Generate a pre-meeting briefing based on project memory"
+            : "Generate a company research report before the first meeting"}
+          clientId={client.client_id}
+          eventType="meeting"
+          disabled={false}
+          onOutputsGenerated={handleOutputsGenerated}
+        />
+
+        {client.email && (
+          <EventCard
+            title="Email reply came in"
+            desc={`From ${client.email.from_name} — "${client.email.subject}"`}
+            clientId={client.client_id}
+            eventType="email"
+            clientEmail={client.email}
+            disabled={false}
+            onOutputsGenerated={handleOutputsGenerated}
+          />
+        )}
+      </div>
+    </>
+  );
+}
+
+// ── Main App ──────────────────────────────────────────────────────
 function App() {
-  const [clients, setClients] = useState([]);
-  const [selected, setSelected] = useState(null);
-  const [selectedTxId, setSelectedTxId] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [activeEvent, setActiveEvent] = useState(null);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
-  const [memory, setMemory] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [showChat, setShowChat] = useState(false);
-  const [historyOutput, setHistoryOutput] = useState(null); // output opened from history
-  const historyPanelRef = useRef(null);
+  const [clients, setClients]       = useState([]);
+  const [selected, setSelected]     = useState(null);
+  const [memory, setMemory]         = useState(null);
+  const [anyLoading, setAnyLoading] = useState(false);
+  const [showChat, setShowChat]     = useState(false);
 
   const loadClients = useCallback(async () => {
     try {
@@ -836,395 +996,167 @@ function App() {
     } catch (e) { console.error(e); }
   }, []);
 
-  const loadMemory = useCallback(async () => {
-    if (!selected) return setMemory(null);
+  const loadMemory = useCallback(async (clientId) => {
+    if (!clientId) { setMemory(null); return; }
     try {
-      const d = await apiFetch(`/api/clients/${selected.client_id}/memory`);
+      const d = await apiFetch(`/api/clients/${clientId}/memory`);
       setMemory(d.memory || null);
     } catch { setMemory(null); }
-  }, [selected]);
+  }, []);
 
   useEffect(() => { loadClients(); }, []);
-  useEffect(() => { loadMemory(); }, [selected]);
 
   const selectClient = async (c) => {
     setSelected(c);
-    setSelectedTxId(c.transcripts[0]?.id || null);
-    setResult(null);
-    setError(null);
     setShowChat(false);
-    setHistoryOutput(null);
-    try {
-      const d = await apiFetch(`/api/clients/${c.client_id}/memory`);
-      setMemory(d.memory || null);
-    } catch { setMemory(null); }
+    await loadMemory(c.client_id);
   };
 
-  const trigger = async (type) => {
-    if (!selected || loading) return;
-    setLoading(true);
-    setActiveEvent(type);
-    setError(null);
-    setResult(null);
-    try {
-      let res;
-      if (type === 'transcript') {
-        res = await apiFetch('/api/events/transcript', {
-          method: 'POST',
-          body: JSON.stringify({ client_id: selected.client_id, transcript_id: selectedTxId }),
-        });
-      } else if (type === 'email') {
-        res = await apiFetch('/api/events/email', {
-          method: 'POST',
-          body: JSON.stringify({ client_id: selected.client_id }),
-        });
-      } else {
-        res = await apiFetch('/api/events/meeting', {
-          method: 'POST',
-          body: JSON.stringify({ client_id: selected.client_id }),
-        });
-      }
-      setResult(res);
-      setHistory(h => [{ id: Date.now(), type, client: selected.company_name, time: new Date().toLocaleTimeString(), outputs: Object.keys(res.outputs || {}).length }, ...h].slice(0, 8));
-      await loadMemory();
+  const handleMemoryChange = useCallback(async () => {
+    if (selected) {
+      await loadMemory(selected.client_id);
       await loadClients();
-      // Reload history panel after new output is saved
-      if (HistoryPanel._reload) await HistoryPanel._reload();
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-      setActiveEvent(null);
     }
-  };
+  }, [selected, loadMemory, loadClients]);
 
-  const resetMem = async (clientId) => {
+  const resetMemory = async (clientId) => {
     await apiFetch('/api/memory/reset', {
       method: 'POST',
       body: JSON.stringify({ client_id: clientId || null }),
     });
     await loadClients();
-    await loadMemory();
-    setResult(null);
-    setHistoryOutput(null);
-    if (HistoryPanel._reload) await HistoryPanel._reload();
+    if (clientId && selected?.client_id === clientId) {
+      setMemory(null);
+    } else if (!clientId) {
+      setMemory(null);
+    }
   };
 
-  const outputs = result ? Object.values(result.outputs || {}) : [];
-  const EVENT_LABELS = { transcript: 'Transcript', email: 'Email Reply', meeting: 'Meeting Prep' };
-  const freshSelected = selected ? (clients.find(c => c.client_id === selected.client_id) || selected) : null;
-
-  // The active output ID for the history panel selection indicator
-  const activeHistoryId = historyOutput?.id || null;
-
-  const openHistoryOutput = (o) => {
-    setHistoryOutput(o);
-    setResult(null);    // clear current event result
-    setError(null);
-  };
+  // Keep selected client data fresh after loadClients
+  const freshSelected = selected
+    ? (clients.find(c => c.client_id === selected.client_id) || selected)
+    : null;
 
   return (
     <div className="app">
-      {/* ── Top Bar ── */}
+
+      {/* ── Top bar ── */}
       <header className="topbar">
         <div className="logo">
           <div className="logo-mark">A</div>
-          <span className="logo-text">Augusta</span>
-          <span className="logo-slash">/</span>
+          <span className="logo-name">Augusta</span>
+          <span className="logo-sep">/</span>
           <span className="logo-sub">PM Agent</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          {loading && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: 'var(--text3)' }}>
-              <InlineSpinner />
-              Agent working…
-            </div>
-          )}
-          {history.length > 0 && !loading && (
-            <div style={{ fontSize: 11, color: 'var(--text3)' }}>
-              {history.length} event{history.length !== 1 ? 's' : ''} this session
-            </div>
-          )}
+        <div className="topbar-right">
           {freshSelected && (
-            <div className="topbar-client">
-              <div className="topbar-client-dot">{freshSelected.company_name.charAt(0)}</div>
-              {freshSelected.company_name}
-            </div>
+            <span style={{ color:'var(--text2)', fontWeight:500 }}>{freshSelected.company_name}</span>
           )}
         </div>
       </header>
 
-      {/* ── Main ── */}
       <div className="main">
 
-        {/* ── LEFT SIDEBAR ── */}
+        {/* ── Left sidebar ── */}
         <aside className="sidebar">
+          <div className="sidebar-header">Clients</div>
 
-          {/* Clients */}
-          <div className="sidebar-section">
-            <div className="sidebar-label">Clients</div>
-            {clients.map(c => {
-              const isSel = selected?.client_id === c.client_id;
-              const hasMem = !!c.memory;
-              return (
-                <div key={c.client_id}>
-                  <div className={`client-item ${isSel ? 'selected' : ''}`} onClick={() => selectClient(c)}>
-                    <div className={`client-initial`}>{c.company_name.charAt(0)}</div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="client-name">{c.company_name}</div>
-                      <div className="client-sub">{c.industry}</div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
-                      {hasMem && <div className={`client-mem-dot active`} title="Has memory"></div>}
-                      <button
-                        className="btn-danger"
-                        onClick={e => { e.stopPropagation(); resetMem(c.client_id); }}
-                        title="Clear memory"
-                        style={{ fontSize: 10, padding: '2px 6px' }}
-                      >Reset</button>
-                    </div>
-                  </div>
-                  {isSel && c.transcripts.length > 0 && (
-                    <div className="transcript-block">
-                      <div className="transcript-block-label">Transcripts</div>
-                      {c.transcripts.map(t => (
-                        <div
-                          key={t.id}
-                          className={`transcript-row ${selectedTxId === t.id ? 'selected' : ''}`}
-                          onClick={e => { e.stopPropagation(); setSelectedTxId(t.id); }}
-                        >
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{t.title}</span>
-                          <span className="transcript-date">{t.date}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+          {clients.map(c => {
+            const isSel = selected?.client_id === c.client_id;
+            const hasMem = !!c.memory;
+            return (
+              <div
+                key={c.client_id}
+                className={`client-item ${isSel ? 'active' : ''}`}
+                onClick={() => selectClient(c)}
+              >
+                <div className="client-avatar">{c.company_name.charAt(0)}</div>
+                <div className="client-info">
+                  <div className="client-name">{c.company_name}</div>
+                  <div className="client-industry">{c.industry}</div>
                 </div>
-              );
-            })}
-          </div>
+                {hasMem && <div className="client-mem-dot" title="Has memory" />}
+              </div>
+            );
+          })}
 
-          {/* Trigger Events */}
-          <div className="sidebar-section">
-            <div className="sidebar-label">Trigger Event</div>
-            <div className="event-btn-row">
-              <button
-                className={`event-btn ${activeEvent === 'transcript' ? 'is-loading' : ''}`}
-                disabled={!selected || !freshSelected?.transcripts?.length || loading}
-                onClick={() => trigger('transcript')}
-              >
-                <span className="event-btn-icon">{loading && activeEvent === 'transcript' ? <InlineSpinner /> : '↗'}</span>
-                <span className="event-btn-text">
-                  <div className="event-btn-label">Meeting transcript came in</div>
-                </span>
-              </button>
-              <button
-                className={`event-btn ${activeEvent === 'email' ? 'is-loading' : ''}`}
-                disabled={!selected || !freshSelected?.email || loading}
-                onClick={() => trigger('email')}
-              >
-                <span className="event-btn-icon">{loading && activeEvent === 'email' ? <InlineSpinner /> : '↩'}</span>
-                <span className="event-btn-text">
-                  <div className="event-btn-label">Email reply came in</div>
-                </span>
-              </button>
-              <button
-                className={`event-btn ${activeEvent === 'meeting' ? 'is-loading' : ''}`}
-                disabled={!selected || loading}
-                onClick={() => trigger('meeting')}
-              >
-                <span className="event-btn-icon">{loading && activeEvent === 'meeting' ? <InlineSpinner /> : '◷'}</span>
-                <span className="event-btn-text">
-                  <div className="event-btn-label">Meeting in 3 hours</div>
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {/* Memory */}
-          <div className="sidebar-section">
-            <div className="sidebar-label">Project Memory</div>
-            <MemoryPanel memory={memory} />
-          </div>
-
-          {/* Activity */}
-          {history.length > 0 && (
-            <div className="sidebar-section">
-              <div className="sidebar-label">Activity</div>
-              {history.slice(0, 5).map(h => (
-                <div key={h.id} className="activity-row">
-                  <div className="activity-dot"></div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {EVENT_LABELS[h.type]} · {h.client}
-                    </div>
-                    <div style={{ fontSize: 10, color: 'var(--text3)', marginTop: 1 }}>{h.outputs} output{h.outputs !== 1 ? 's' : ''} · {h.time}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Reset All */}
-          <div className="sidebar-section" style={{ marginTop: 'auto' }}>
+          <div className="sidebar-footer">
             <button
-              className="btn btn-outline"
-              style={{ width: '100%', justifyContent: 'center', fontSize: 11 }}
-              onClick={() => resetMem()}
+              className="btn btn-outline btn-sm"
+              style={{ width:'100%', justifyContent:'center' }}
+              onClick={() => resetMemory()}
             >
               Reset all memory
             </button>
           </div>
         </aside>
 
-        {/* ── CENTER CONTENT ── */}
-        <main className="content">
-
-          {/* Page header */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
-            <div>
-              <h1 className="page-title">
-                {result
-                  ? `${EVENT_LABELS[result.event_type] || result.event_type} — ${freshSelected?.company_name}`
-                  : freshSelected ? `${freshSelected.company_name}` : 'Augusta PM Agent'
-                }
-              </h1>
-              <p className="page-sub">
-                {result
-                  ? `${outputs.length} output${outputs.length !== 1 ? 's' : ''} generated · ${new Date(result.timestamp).toLocaleTimeString()}`
-                  : freshSelected ? `Select a transcript, then trigger an event` : 'Select a client to get started'
-                }
-              </p>
-            </div>
-            {result && (
-              <button className="btn btn-outline btn-sm" onClick={() => setResult(null)}>Clear</button>
-            )}
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div className="error-bar fade-in">
-              <div style={{ flex: 1 }}>
-                <div className="error-title">Error</div>
-                <div className="error-msg">{error}</div>
-              </div>
-              <button className="error-close" onClick={() => setError(null)}>×</button>
-            </div>
-          )}
-
-          {/* Loading */}
-          {loading && (
-            <div className="loading-state fade-in">
-              <div className="spinner"></div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>Agent is working…</div>
-                <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 3 }}>
-                  {activeEvent === 'transcript' && 'Analyzing transcript, extracting insights, generating outputs'}
-                  {activeEvent === 'email' && 'Reading email, checking context, drafting response'}
-                  {activeEvent === 'meeting' && (memory ? 'Checking memory, preparing meeting brief' : 'No prior context, generating research report')}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Incoming email preview */}
-          {!loading && result?.incoming_email && (
-            <div className="email-preview fade-in">
-              <div className="email-preview-label">Incoming Email</div>
-              <div className="email-preview-subject">{result.incoming_email.subject}</div>
-              <div className="email-preview-from">From: {result.incoming_email.from}</div>
-              <div className="email-preview-body">{result.incoming_email.preview}</div>
-            </div>
-          )}
-
-          {/* Transcript / branch info */}
-          {!loading && result?.transcript_title && (
-            <div className="context-banner fade-in">
-              <strong>Transcript:</strong>
-              <span>{result.transcript_title}</span>
-              {result.branch === 'new_client'      && <span className="status-badge" style={{ marginLeft: 4 }}>New Client</span>}
-              {result.branch === 'existing_client' && <span className="status-badge" style={{ marginLeft: 4 }}>Existing Client</span>}
-            </div>
-          )}
-
-          {/* Outputs */}
-          {!loading && outputs.length > 0 && (
-            <div>
-              {outputs.map((out, i) => (
-                <OutputPanel key={i} output={out} defaultOpen={i === 0} />
-              ))}
-            </div>
-          )}
-
-          {/* History output view — when user clicks an item from history */}
-          {!loading && !result && !error && historyOutput && (
-            <div className="fade-in">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                <button
-                  className="btn btn-outline btn-sm"
-                  onClick={() => setHistoryOutput(null)}
-                  style={{ gap: 4 }}
-                >← Back</button>
-                <span style={{ fontSize: 11, color: 'var(--text3)' }}>From history · {formatDate(historyOutput.created_at)}</span>
-              </div>
-              <OutputPanel output={historyOutput} defaultOpen={true} />
-            </div>
-          )}
-
-          {/* Empty state */}
-          {!loading && !result && !error && !historyOutput && (
+        {/* ── Center workspace ── */}
+        <main className="workspace">
+          {!freshSelected ? (
             <div className="empty-state">
-              <div className="empty-state-title">Augusta PM Agent</div>
-              <div className="empty-state-desc">
-                Select a client, choose a transcript, then trigger an event.
-                The agent will generate emails, proposals, team plans, and briefings — with memory that evolves over time.
+              <div className="empty-title">Select a client to get started</div>
+              <div className="empty-desc">
+                Choose a client from the sidebar to open their engagement workspace,
+                run events, and review generated outputs.
               </div>
-              <div className="how-grid">
+              <div className="empty-grid">
                 {[
-                  { title: 'Transcript',    desc: 'Extracts insights, drafts follow-up email, creates team plan and proposal' },
-                  { title: 'Email Reply',   desc: 'Reads full context, generates a comprehensive response draft' },
-                  { title: 'Meeting Prep',  desc: 'Briefing doc for known clients, research report for new ones' },
-                  { title: 'Memory',        desc: 'Context persists across events — run all 3 transcripts to see it evolve' },
-                ].map(item => (
-                  <div key={item.title} className="how-card">
-                    <div className="how-card-title">{item.title}</div>
-                    <div className="how-card-desc">{item.desc}</div>
+                  { t:'Transcripts',   d:'Process meeting recordings to extract insights, generate emails and plans' },
+                  { t:'Meeting Prep',  d:'Brief the team before an upcoming call, or research a new client' },
+                  { t:'Email Reply',   d:'Draft a contextual response to an incoming client email' },
+                  { t:'Memory',        d:'Context accumulates across events and evolves with each transcript' },
+                ].map(x => (
+                  <div key={x.t} className="empty-card">
+                    <div className="empty-card-t">{x.t}</div>
+                    <div className="empty-card-d">{x.d}</div>
                   </div>
                 ))}
               </div>
             </div>
+          ) : (
+            <Workspace
+              key={freshSelected.client_id}
+              client={freshSelected}
+              memory={memory}
+              onMemoryChange={handleMemoryChange}
+            />
           )}
         </main>
 
-        {/* ── RIGHT SIDEBAR ── */}
+        {/* ── Right panel ── */}
         <aside className="right-panel">
 
           {/* Chat */}
-          <div className="sidebar-section">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-              <div className="sidebar-label" style={{ margin: 0 }}>Ask the Agent</div>
+          <div className="rp-section">
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
+              <div className="rp-label" style={{ margin:0 }}>Ask the Agent</div>
               {freshSelected && (
                 <button
                   className="btn btn-outline btn-sm"
-                  onClick={() => setShowChat(!showChat)}
+                  onClick={() => setShowChat(v => !v)}
                 >
                   {showChat ? 'Hide' : 'Open chat'}
                 </button>
               )}
             </div>
+
             {showChat && freshSelected ? (
-              <ChatPanel clientId={freshSelected.client_id} companyName={freshSelected.company_name} />
+              <ChatPanel
+                clientId={freshSelected.client_id}
+                companyName={freshSelected.company_name}
+              />
             ) : (
               <div
                 style={{
-                  border: '1px solid var(--border)', borderRadius: 4,
-                  padding: '20px 14px', textAlign: 'center',
-                  cursor: freshSelected ? 'pointer' : 'default', background: '#ffffff',
+                  border:'1px solid var(--border)', borderRadius:4,
+                  padding:'18px 14px', textAlign:'center',
+                  cursor: freshSelected ? 'pointer' : 'default',
                 }}
                 onClick={() => freshSelected && setShowChat(true)}
               >
-                <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 4 }}>Chat Interface</div>
-                <div style={{ fontSize: 11.5, color: 'var(--text3)', lineHeight: 1.6 }}>
+                <div style={{ fontSize:13, fontWeight:500, color:'var(--text)', marginBottom:3 }}>Chat Interface</div>
+                <div style={{ fontSize:11.5, color:'var(--text3)', lineHeight:1.6 }}>
                   {freshSelected
                     ? 'Ask questions, refine outputs, explore context'
                     : 'Select a client to start chatting'}
@@ -1233,57 +1165,29 @@ function App() {
             )}
           </div>
 
-          {/* Output History */}
-          <div className="sidebar-section">
-            <div className="sidebar-label">Output History</div>
-            <HistoryPanel
-              clientId={freshSelected?.client_id || null}
-              onOpen={openHistoryOutput}
-              activeId={activeHistoryId}
+          {/* Project Memory */}
+          <div className="rp-section">
+            <div className="rp-label">Project Memory</div>
+            <MemoryPanel
+              memory={memory}
+              onReset={freshSelected ? () => resetMemory(freshSelected.client_id) : null}
             />
           </div>
 
-          {/* Insights */}
-          {result?.insights && (
-            <div className="sidebar-section">
-              <div className="sidebar-label">Agent Insights</div>
-              <InsightsPanel insights={result.insights} />
+          {/* Test data guide */}
+          <div className="rp-section">
+            <div className="rp-label">Test Data</div>
+            <div style={{ fontSize:11.5, color:'var(--text3)', lineHeight:1.9 }}>
+              <div><span style={{ color:'var(--text2)', fontWeight:500 }}>Atlassian</span> — 3 calls, 1 email</div>
+              <div><span style={{ color:'var(--text2)', fontWeight:500 }}>Marsh McLennan</span> — 3 calls, 1 email</div>
             </div>
-          )}
-
-          {/* Suggested flow */}
-          {!result && !historyOutput && (
-            <div className="sidebar-section">
-              <div className="sidebar-label">Suggested Flow</div>
-              <div className="steps">
-                {[
-                  { n: '1', t: 'Meeting in 3 hours',    d: 'Start fresh — get research or prep brief' },
-                  { n: '2', t: 'Run all 3 transcripts', d: 'Watch memory build, outputs evolve with context' },
-                  { n: '3', t: 'Email reply came in',   d: 'See context-aware email response' },
-                  { n: '4', t: 'Chat with the agent',   d: 'Ask questions, refine any output' },
-                ].map(s => (
-                  <div key={s.n} className="step">
-                    <div className="step-num">{s.n}</div>
-                    <div>
-                      <div className="step-title">{s.t}</div>
-                      <div className="step-desc">{s.d}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Test data */}
-          <div className="sidebar-section">
-            <div className="sidebar-label">Test Data</div>
-            <div style={{ fontSize: 11.5, color: 'var(--text3)', lineHeight: 1.8 }}>
-              <div><span style={{ color: 'var(--text2)', fontWeight: 500 }}>Atlassian</span> — Fintech · 3 transcripts</div>
-              <div><span style={{ color: 'var(--text2)', fontWeight: 500 }}>MedBridge Health</span> — Healthcare · 3 transcripts</div>
+            <div style={{ marginTop:8, fontSize:11, color:'var(--text3)', lineHeight:1.7 }}>
+              Suggested flow: run all 3 transcripts in order, then trigger the email event to see memory evolve.
             </div>
           </div>
 
         </aside>
+
       </div>
     </div>
   );
