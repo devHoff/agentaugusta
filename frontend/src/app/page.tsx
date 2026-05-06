@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Zap, AlertCircle, X, ChevronRight, RotateCcw, Sparkles, Activity } from 'lucide-react';
 import ClientSelector from '@/components/ClientSelector';
 import EventButtons from '@/components/EventButtons';
@@ -15,8 +15,10 @@ import {
   sendChat,
   resetMemory,
   getClientMemory,
+  getClientOutputs,
   type ClientInfo,
   type AgentResult,
+  type PersistedOutputItem,
 } from '@/lib/api';
 
 interface HistoryEntry {
@@ -34,10 +36,12 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [activeEvent, setActiveEvent] = useState<string | null>(null);
   const [result, setResult] = useState<AgentResult | null>(null);
+  const [resultsByClientId, setResultsByClientId] = useState<Record<string, AgentResult | null>>({});
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [clientMemory, setClientMemory] = useState<Record<string, unknown> | null>(null);
   const [showChat, setShowChat] = useState(false);
+  const selectedClientIdRef = useRef<string | null>(null);
 
   // Load clients
   const loadClients = useCallback(async () => {
@@ -68,15 +72,53 @@ export default function Home() {
     refreshMemory();
   }, [refreshMemory]);
 
+  const buildSavedResult = (
+    client: ClientInfo,
+    savedOutputs: PersistedOutputItem[]
+  ): AgentResult | null => {
+    if (savedOutputs.length === 0) return null;
+
+    const newest = savedOutputs[0];
+    const outputs = savedOutputs.reduce<Record<string, PersistedOutputItem>>((acc, output, index) => {
+      acc[output.id || `saved-${index}`] = output;
+      return acc;
+    }, {});
+
+    return {
+      event_type: newest.event_type || 'saved_outputs',
+      client_id: client.client_id,
+      timestamp: newest.created_at || new Date().toISOString(),
+      transcript_title: newest.transcript_title,
+      outputs,
+    };
+  };
+
+  const loadSavedResult = async (client: ClientInfo) => {
+    try {
+      const savedOutputs = await getClientOutputs(client.client_id);
+      const savedResult = buildSavedResult(client, savedOutputs);
+      setResultsByClientId((prev) => ({ ...prev, [client.client_id]: savedResult }));
+      if (selectedClientIdRef.current === client.client_id) {
+        setResult(savedResult);
+      }
+    } catch {
+      // Keep the in-session cached result visible if persisted outputs cannot be loaded.
+    }
+  };
+
   const handleSelectClient = async (client: ClientInfo) => {
+    selectedClientIdRef.current = client.client_id;
     setSelectedClient(client);
     setSelectedTranscriptId(client.transcripts[0]?.id || null);
-    setResult(null);
+    setResult(resultsByClientId[client.client_id] || null);
     setError(null);
     setShowChat(false);
-    // Load memory
+    // Load memory and any previously generated outputs for this client.
     try {
-      const mem = await getClientMemory(client.client_id);
+      const [mem] = await Promise.all([
+        getClientMemory(client.client_id),
+        loadSavedResult(client),
+      ]);
       setClientMemory(mem?.memory || null);
     } catch {
       setClientMemory(null);
@@ -100,6 +142,10 @@ export default function Home() {
         res = await triggerMeeting(selectedClient.client_id);
       }
       setResult(res);
+      setResultsByClientId((prev) => ({
+        ...prev,
+        [selectedClient.client_id]: res,
+      }));
 
       // Add to history
       const entry: HistoryEntry = {
@@ -125,6 +171,12 @@ export default function Home() {
   const handleResetMemory = async (clientId?: string) => {
     await resetMemory(clientId);
     await loadClients();
+    setResultsByClientId((prev) => {
+      if (!clientId) return {};
+      const next = { ...prev };
+      delete next[clientId];
+      return next;
+    });
     if (selectedClient) {
       await refreshMemory();
     }
@@ -143,6 +195,9 @@ export default function Home() {
     transcript: '📝 Transcript',
     email: '📧 Email Reply',
     meeting: '📅 Upcoming Meeting',
+    email_reply: 'Email Reply',
+    upcoming_meeting: 'Upcoming Meeting',
+    saved_outputs: 'Saved Outputs',
   };
 
   const outputItems = result ? Object.values(result.outputs || {}) : [];

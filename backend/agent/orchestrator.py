@@ -132,6 +132,7 @@ def handle_transcript(client_id: str, transcript_id: str = None, custom_transcri
             "title": item["title"],
             "content": item["content"],
             "event_type": outputs["event_type"],
+            "transcript_id": transcript_obj["id"] if not custom_transcript else "custom",
             "transcript_title": transcript_title,
         })
 

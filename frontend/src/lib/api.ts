@@ -6,6 +6,13 @@ export interface OutputItem {
   content: string;
 }
 
+export interface PersistedOutputItem extends OutputItem {
+  id?: string;
+  created_at?: string;
+  event_type?: string;
+  transcript_title?: string;
+}
+
 export interface AgentResult {
   event_type: string;
   client_id: string;
@@ -106,4 +113,11 @@ export async function getClientMemory(clientId: string) {
   const res = await fetch(`${BASE_URL}/api/clients/${clientId}/memory`);
   if (!res.ok) return null;
   return res.json();
+}
+
+export async function getClientOutputs(clientId: string): Promise<PersistedOutputItem[]> {
+  const res = await fetch(`${BASE_URL}/api/clients/${clientId}/outputs`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.outputs || [];
 }

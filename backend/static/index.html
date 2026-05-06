@@ -486,9 +486,14 @@ function OutputPanel({ output, defaultOpen = true }) {
 function TranscriptCard({ transcript, index, clientId, persistedOutputs, onRun }) {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
+  const [showOutputs, setShowOutputs] = useState(false);
 
   // persistedOutputs: array of output objects already stored for this transcript
   const hasOutputs = persistedOutputs && persistedOutputs.length > 0;
+
+  useEffect(() => {
+    if (!hasOutputs) setShowOutputs(false);
+  }, [hasOutputs]);
 
   const run = async () => {
     if (loading) return;
@@ -502,6 +507,7 @@ function TranscriptCard({ transcript, index, clientId, persistedOutputs, onRun }
       // Pass fresh outputs + insights up to Workspace
       const generated = Object.values(res.outputs || {});
       onRun({ transcriptId: transcript.id, outputs: generated, insights: res.insights || null });
+      setShowOutputs(true);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -524,9 +530,18 @@ function TranscriptCard({ transcript, index, clientId, persistedOutputs, onRun }
           {hasOutputs && (
             <span className="badge">{persistedOutputs.length} output{persistedOutputs.length !== 1 ? 's' : ''}</span>
           )}
+          {hasOutputs && (
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() => setShowOutputs(v => !v)}
+            >
+              {showOutputs ? 'Hide ▲' : 'Show ▼'}
+            </button>
+          )}
           <button
             className="btn btn-solid btn-sm"
             disabled={loading}
+            style={{ display: hasOutputs ? 'none' : undefined }}
             onClick={run}
           >
             {loading ? <><span className="spinner-sm" /> Running…</> : 'Run'}
@@ -553,7 +568,7 @@ function TranscriptCard({ transcript, index, clientId, persistedOutputs, onRun }
       )}
 
       {/* Outputs zone — driven by persisted state from parent */}
-      {!loading && hasOutputs && (
+      {!loading && hasOutputs && showOutputs && (
         <div className="tx-outputs fade-in">
           <div className="tx-outputs-label">Generated outputs</div>
           {persistedOutputs.map((o, i) => (
@@ -919,11 +934,9 @@ function Workspace({ client, memory, onMemoryChange }) {
         if (cancelled) return;
         const allOutputs = data.outputs || [];   // newest-first from backend
 
-        // Build a set of transcript IDs for this client
-        const txIds = new Set((client.transcripts || []).map(t => t.id));
-
         const newTxOutputs  = {};
         const newEvtOutputs = {};
+        const normalizeTitle = value => (value || '').replace(/\s+/g, ' ').trim().toLowerCase();
 
         // Outputs are newest-first; we want to display them oldest-first per card,
         // so we reverse once then distribute.
@@ -931,9 +944,9 @@ function Workspace({ client, memory, onMemoryChange }) {
 
         chronological.forEach(o => {
           if (o.event_type === 'transcript') {
-            // Match to a transcript by transcript_title or, if available, by transcript_id
-            // The orchestrator stores `transcript_title` in the output record.
-            const matchTx = (client.transcripts || []).find(t => t.title === o.transcript_title);
+            const matchTx = (client.transcripts || []).find(t =>
+              t.id === o.transcript_id || normalizeTitle(t.title) === normalizeTitle(o.transcript_title)
+            );
             const key = matchTx ? matchTx.id : '__unmatched__';
             if (!newTxOutputs[key]) newTxOutputs[key] = [];
             newTxOutputs[key].push(o);
