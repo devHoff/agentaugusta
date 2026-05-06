@@ -7,6 +7,7 @@ import sys
 # Add the parent directory to path so `backend` package is importable
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
@@ -15,11 +16,19 @@ from pydantic import BaseModel
 from typing import Optional, List
 import traceback
 
+load_dotenv()
+
 from backend.agent.orchestrator import (
     handle_transcript,
     handle_upcoming_meeting,
     handle_email_reply,
     handle_chat,
+)
+from backend.agent.tracing import (
+    flush_traces,
+    get_tracing_status,
+    trace_agent_event,
+    update_trace_output,
 )
 from backend.memory import store
 from backend.data.test_data import TEST_CLIENTS, TRANSCRIPTS, EMAIL_REPLIES
@@ -33,6 +42,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("shutdown")
+def shutdown_event():
+    flush_traces()
+
+
+@app.on_event("startup")
+def startup_event():
+    status = get_tracing_status()
+    if status["enabled"] and status["sdk_installed"] and status["has_public_key"] and status["has_secret_key"]:
+        print(f"Langfuse tracing enabled ({status['base_url'] or 'default host'})")
+    else:
+        print(f"Langfuse tracing not active: {status}")
 
 
 # ─────────────────────────────────────────────
@@ -71,6 +94,11 @@ class ResetRequest(BaseModel):
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "Augusta PM Agent"}
+
+
+@app.get("/api/tracing/status")
+def tracing_status():
+    return get_tracing_status()
 
 
 # ─────────────────────────────────────────────
@@ -134,11 +162,24 @@ def get_client_outputs(client_id: str):
 def event_transcript(req: TranscriptEvent):
     """Handle: Meeting transcript came in."""
     try:
-        result = handle_transcript(
+        with trace_agent_event(
+            name="process-transcript",
             client_id=req.client_id,
-            transcript_id=req.transcript_id,
-            custom_transcript=req.custom_transcript,
-        )
+            event_type="transcript",
+            input_data={
+                "transcript_id": req.transcript_id,
+                "has_custom_transcript": bool(req.custom_transcript),
+            },
+        ) as span:
+            result = handle_transcript(
+                client_id=req.client_id,
+                transcript_id=req.transcript_id,
+                custom_transcript=req.custom_transcript,
+            )
+            update_trace_output(span, {
+                "output_types": list((result.get("outputs") or {}).keys()),
+                "has_insights": bool(result.get("insights")),
+            })
         if "error" in result:
             raise HTTPException(status_code=404, detail=result["error"])
         return result
@@ -153,7 +194,17 @@ def event_transcript(req: TranscriptEvent):
 def event_meeting(req: MeetingEvent):
     """Handle: Meeting in 3 hours."""
     try:
-        result = handle_upcoming_meeting(client_id=req.client_id)
+        with trace_agent_event(
+            name="prepare-meeting",
+            client_id=req.client_id,
+            event_type="meeting",
+            input_data={"client_id": req.client_id},
+        ) as span:
+            result = handle_upcoming_meeting(client_id=req.client_id)
+            update_trace_output(span, {
+                "branch": result.get("branch"),
+                "output_types": list((result.get("outputs") or {}).keys()),
+            })
         if "error" in result:
             raise HTTPException(status_code=404, detail=result["error"])
         return result
@@ -168,10 +219,20 @@ def event_meeting(req: MeetingEvent):
 def event_email(req: EmailEvent):
     """Handle: Email reply came in."""
     try:
-        result = handle_email_reply(
+        with trace_agent_event(
+            name="draft-email-reply",
             client_id=req.client_id,
-            custom_email=req.custom_email,
-        )
+            event_type="email",
+            input_data={"has_custom_email": bool(req.custom_email)},
+        ) as span:
+            result = handle_email_reply(
+                client_id=req.client_id,
+                custom_email=req.custom_email,
+            )
+            update_trace_output(span, {
+                "output_types": list((result.get("outputs") or {}).keys()),
+                "incoming_subject": (result.get("incoming_email") or {}).get("subject"),
+            })
         if "error" in result:
             raise HTTPException(status_code=404, detail=result["error"])
         return result
@@ -186,11 +247,21 @@ def event_email(req: EmailEvent):
 def chat_endpoint(req: ChatRequest):
     """Chat with the agent about a client engagement."""
     try:
-        response = handle_chat(
+        with trace_agent_event(
+            name="chat-response",
             client_id=req.client_id,
-            messages=req.messages,
-            system_context=req.system_context or "",
-        )
+            event_type="chat",
+            input_data={
+                "message_count": len(req.messages),
+                "has_system_context": bool(req.system_context),
+            },
+        ) as span:
+            response = handle_chat(
+                client_id=req.client_id,
+                messages=req.messages,
+                system_context=req.system_context or "",
+            )
+            update_trace_output(span, {"response_length": len(response)})
         return {"response": response}
     except Exception as e:
         traceback.print_exc()

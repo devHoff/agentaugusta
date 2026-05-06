@@ -61,27 +61,27 @@ An AI-powered **Project Management Agent** for Augusta's client engagements. Eve
 
 Two pre-loaded clients, each with a realistic multi-meeting engagement:
 
-### FinoVa Capital (Fintech)
-Real-time data pipeline modernisation for a mid-market investment fund. $315k engagement, Q3 deadline, Meridian Fund at risk.
-- **T1** — Kickoff: discovery, 18-hour lag problem, ballpark $280-320k
-- **T2** — Technical Deep-Dive: Kafka + Snowflake architecture, 12-week plan
-- **T3** — SOW Negotiation: $290k agreed, 35/35/30 payment, July 25 go-live
-- **Email** — James Liu: rate limits on broker APIs, security review request
+### Atlassian (B2B SaaS)
+AI-enabled product rebuild for a project/workflow management company under competitive pressure.
+- **T1** - Intro Call: discovery, product rebuild goals, Q3 urgency
+- **T2** - Scoping Call: architecture, customer flows, migration questions
+- **T3** - Project Kickoff: implementation plan, owners, evaluation approach
+- **Email** - Henrik Aalsbjerg: proposal follow-up and project concerns
 
-### MedBridge Health (Healthcare)
-Predictive readmission platform for 2.3M patient records across 47 clinic partners. Series B funded, grant deadline August 31.
-- **T1** — Discovery: HIPAA compliance, EMR fragmentation, $400k budget
-- **T2** — Architecture Workshop: Azure + FHIR + Databricks design, Presidio for de-id
-- **T3** — Kickoff sign-off: $360k ceiling, August 15 milestone, BAA finalised
-- **Email** — Nina Patel: Azure access, 3 clinics mid-EMR-migration, Presidio concerns
+### Marsh McLennan (Insurance / Risk Advisory)
+Agentic workflow automation for broker operations and submission handling.
+- **T1** - Intro Call: broker workflow discovery, Acturis constraints, Azure preference
+- **T2** - Proposal Walkthrough: scope, pricing, IP ownership, security controls
+- **T3** - Week 1 Status: blockers, named owners, checkpoint planning
+- **Email** - Rebecca Halloway: revised proposal and implementation concerns
 
 ### Suggested Demo Flow
-1. Select **FinoVa** → click **Meeting in 3 hours** → see Research Report (no memory yet)
-2. Click **Transcript** (T1 Kickoff) → see Email + Proposal + Team Plan + memory builds
-3. Click **Transcript** (T2) → outputs now reference T1 context
-4. Click **Transcript** (T3) → full history in every output
+1. Select **Atlassian** → click **Meeting in 3 hours** → see Research Report (no memory yet)
+2. Click **Run** on Call 1 → see generated follow-up email and memory builds
+3. Leave the client and return → Call 1 now shows **Show** instead of **Run**
+4. Click **Run** on Call 2 or Call 3 → outputs reference earlier project memory
 5. Click **Meeting in 3 hours** again → now see Meeting Prep (not research)
-6. Click **Email Reply came in** → context-aware reply to James Liu's concerns
+6. Click **Email reply came in** → context-aware reply to Henrik's concerns
 7. Open **Chat** → ask "What are the biggest risks?" or "What should I prep for Monday?"
 
 ---
@@ -90,43 +90,76 @@ Predictive readmission platform for 2.3M patient records across 47 clinic partne
 
 ### Prerequisites
 - Python 3.10+
-- An OpenAI-compatible API key (set `OPENAI_API_KEY` or `GSK_TOKEN`)
+- An OpenAI-compatible API key
 
 ### Setup
 
 ```bash
 git clone <repo-url>
-cd webapp
+cd agentaugusta
 
 # Install Python dependencies
-pip install fastapi uvicorn openai pydantic python-dotenv aiofiles python-multipart
+python3 -m pip install -r backend/requirements.txt
 
-# Set your API key
-export OPENAI_API_KEY=your-key-here
-# or
-export GSK_TOKEN=your-genspark-token
+# Create your local environment file
+cp .env.example .env
+```
 
+On Windows `cmd.exe`, use:
+
+```bat
+copy .env.example .env
+```
+
+Open `.env` and set at least:
+
+```env
+OPENAI_API_KEY=sk-your-openai-key-here
+```
+
+Optional Langfuse tracing can also be enabled in `.env`:
+
+```env
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_BASE_URL=https://cloud.langfuse.com
+```
+
+Then start the server:
+
+```bash
 # Start the server
 python3 -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
 ```
 
 Open http://localhost:8000 in your browser.
 
+On Windows, if `python3` is not available, use `python` in the commands above.
+
 ### Environment Variables
 | Variable | Description |
 |---|---|
-| `GSK_TOKEN` | GenSpark token (checked first) |
-| `OPENAI_API_KEY` or `GENSPARK_TOKEN` | Alternative API keys |
-| `OPENAI_BASE_URL` | API base URL (default: GenSpark proxy) |
+| `OPENAI_API_KEY` | Required OpenAI API key |
+| `OPENAI_BASE_URL` | Optional OpenAI-compatible API base URL |
+| `LANGFUSE_PUBLIC_KEY` | Langfuse project public key for tracing |
+| `LANGFUSE_SECRET_KEY` | Langfuse project secret key for tracing |
+| `LANGFUSE_BASE_URL` | Langfuse host, for example `https://cloud.langfuse.com` or `https://us.cloud.langfuse.com` |
+| `LANGFUSE_TRACING_ENABLED` | Set to `false` to disable Langfuse tracing without code changes |
 
-The app also auto-reads `~/.genspark_llm.yaml` if present.
+Langfuse onboarding remains `Pending` until the running server receives at least one traced request. After setting the variables above, restart uvicorn and trigger a transcript, meeting, email, or chat action in the UI.
+
+### Submission Notes
+
+- Do not include a real `.env` file in the zip. It is ignored by git and should stay local.
+- Runtime memory is written to `backend/memory/memory.json` and is ignored by git so the reviewer starts from a clean demo state.
+- The app is intentionally single-server: no frontend build step is required.
 
 ---
 
 ## Project Structure
 
 ```
-webapp/
+agentaugusta/
 ├── backend/
 │   ├── main.py              # FastAPI app — all routes + static UI serving
 │   ├── agent/

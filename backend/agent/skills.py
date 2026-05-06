@@ -36,7 +36,14 @@ Extract and return JSON with these exact fields:
 TRANSCRIPT:
 {transcript}"""
 
-    raw = chat(system, user, model="gpt-4o-mini", max_completion_tokens=3000)
+    raw = chat(
+        system,
+        user,
+        model="gpt-4o-mini",
+        max_completion_tokens=3000,
+        trace_name="extract-transcript-insights",
+        metadata={"feature": "transcript", "company": company},
+    )
     import json, re
     # Strip markdown code blocks if present
     clean = re.sub(r"```(?:json)?", "", raw).strip().strip("`").strip()
@@ -106,7 +113,14 @@ Subject: [subject line]
 
 [email body]"""
 
-    return chat(system, user, model="gpt-4o-mini", max_completion_tokens=2000)
+    return chat(
+        system,
+        user,
+        model="gpt-4o-mini",
+        max_completion_tokens=2000,
+        trace_name="draft-followup-email",
+        metadata={"feature": "transcript", "company": company},
+    )
 
 
 # ─────────────────────────────────────────────
@@ -159,7 +173,14 @@ Create a professional proposal in Markdown with these sections:
 
 Make it specific to {company}'s situation based on the transcript content."""
 
-    return chat(system, user, model="gpt-4o-mini", max_completion_tokens=3000)
+    return chat(
+        system,
+        user,
+        model="gpt-4o-mini",
+        max_completion_tokens=3000,
+        trace_name="generate-proposal",
+        metadata={"feature": "transcript", "company": company},
+    )
 
 
 # ─────────────────────────────────────────────
@@ -219,7 +240,14 @@ Generate an internal team plan in Markdown with:
 ## Blockers Needing Escalation
 (Anything that needs leadership attention)"""
 
-    return chat(system, user, model="gpt-4o-mini", max_completion_tokens=2500)
+    return chat(
+        system,
+        user,
+        model="gpt-4o-mini",
+        max_completion_tokens=2500,
+        trace_name="generate-team-plan",
+        metadata={"feature": "transcript", "company": company},
+    )
 
 
 # ─────────────────────────────────────────────
@@ -270,7 +298,14 @@ Create a research report in Markdown with:
 
 Note: This is based on general industry knowledge since we have no prior history with this client."""
 
-    return chat(system, user, model="gpt-4o-mini", max_completion_tokens=2800)
+    return chat(
+        system,
+        user,
+        model="gpt-4o-mini",
+        max_completion_tokens=2800,
+        trace_name="generate-research-report",
+        metadata={"feature": "meeting", "company": company},
+    )
 
 
 # ─────────────────────────────────────────────
@@ -330,7 +365,14 @@ Generate a meeting prep document in Markdown:
 ## What Success Looks Like
 (What should we walk away with from this meeting?)"""
 
-    return chat(system, user, model="gpt-4o-mini", max_completion_tokens=2800)
+    return chat(
+        system,
+        user,
+        model="gpt-4o-mini",
+        max_completion_tokens=2800,
+        trace_name="generate-meeting-prep",
+        metadata={"feature": "meeting", "company": company},
+    )
 
 
 # ─────────────────────────────────────────────
@@ -372,4 +414,11 @@ Subject: Re: {subject}
 
 [email body with proper greeting and sign-off as Marcus Reid / Diana Park, Engagement Lead at Augusta]"""
 
-    return chat(system, user, model="gpt-4o-mini", max_completion_tokens=2500)
+    return chat(
+        system,
+        user,
+        model="gpt-4o-mini",
+        max_completion_tokens=2500,
+        trace_name="draft-email-reply",
+        metadata={"feature": "email", "company": company, "subject": subject},
+    )
