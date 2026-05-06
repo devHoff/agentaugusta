@@ -125,6 +125,16 @@ def handle_transcript(client_id: str, transcript_id: str = None, custom_transcri
     for item in insights.get("open_items", []):
         store.append_open_item(client_id, item)
 
+    # STEP 6: Persist generated outputs to history
+    for item in outputs["outputs"].values():
+        store.append_output(client_id, {
+            "type": item["type"],
+            "title": item["title"],
+            "content": item["content"],
+            "event_type": outputs["event_type"],
+            "transcript_title": transcript_title,
+        })
+
     return outputs
 
 
@@ -185,6 +195,15 @@ def handle_upcoming_meeting(client_id: str) -> dict:
             "summary": f"Pre-meeting briefing generated for {company}",
         })
 
+    # Persist generated outputs to history
+    for item in outputs["outputs"].values():
+        store.append_output(client_id, {
+            "type": item["type"],
+            "title": item["title"],
+            "content": item["content"],
+            "event_type": outputs["event_type"],
+        })
+
     return outputs
 
 
@@ -232,7 +251,7 @@ def handle_email_reply(client_id: str, custom_email: dict = None) -> dict:
         "summary": f"Email received from {email_data.get('from_name', client_name)}: {email_data.get('subject', '')}",
     })
 
-    return {
+    result = {
         "event_type": "email_reply",
         "client_id": client_id,
         "timestamp": datetime.utcnow().isoformat(),
@@ -249,6 +268,18 @@ def handle_email_reply(client_id: str, custom_email: dict = None) -> dict:
             }
         },
     }
+
+    # Persist generated outputs to history
+    for item in result["outputs"].values():
+        store.append_output(client_id, {
+            "type": item["type"],
+            "title": item["title"],
+            "content": item["content"],
+            "event_type": result["event_type"],
+            "subject": email_data.get("subject", ""),
+        })
+
+    return result
 
 
 # ─────────────────────────────────────────────

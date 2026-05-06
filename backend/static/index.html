@@ -374,6 +374,37 @@
   }
   .copy-btn:hover { border-color: var(--border2); color: var(--text); background: var(--bg2); }
 
+  /* ── Output History ── */
+  .history-list { display: flex; flex-direction: column; }
+  .history-row {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 8px; border-radius: 3px; cursor: pointer;
+    transition: background 0.1s; border-left: 2px solid transparent;
+  }
+  .history-row:hover { background: var(--bg2); }
+  .history-row.active { background: var(--bg2); border-left-color: var(--text); }
+  .history-row-type {
+    font-size: 9px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text3);
+    border: 1px solid var(--border); border-radius: 2px;
+    padding: 1px 5px; flex-shrink: 0; white-space: nowrap;
+  }
+  .history-row-title {
+    font-size: 12px; color: var(--text); flex: 1;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .history-row-date { font-size: 10px; color: var(--text3); flex-shrink: 0; }
+  .history-filter-row {
+    display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .filter-btn {
+    font-size: 10px; padding: 3px 8px; border-radius: 3px;
+    border: 1px solid var(--border); color: var(--text3);
+    cursor: pointer; transition: all 0.1s; background: var(--bg);
+  }
+  .filter-btn:hover  { background: var(--bg2); color: var(--text); }
+  .filter-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+
   /* ── Misc ── */
   .divider { height: 1px; background: var(--border); margin: 12px 0; }
   .topbar-client {
@@ -681,6 +712,98 @@ function InsightsPanel({ insights }) {
   );
 }
 
+// ─── Output History Panel ───────────────────────────────────────
+const OUTPUT_TYPE_LABELS = {
+  email:           'Email',
+  proposal:        'Proposal',
+  team_plan:       'Team Plan',
+  meeting_prep:    'Meeting Prep',
+  research_report: 'Research',
+  email_reply:     'Email Reply',
+};
+
+const FILTERS = [
+  { key: 'all',      label: 'All' },
+  { key: 'email',    label: 'Emails' },
+  { key: 'proposal', label: 'Proposals' },
+  { key: 'team_plan', label: 'Plans' },
+];
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+function HistoryPanel({ clientId, onOpen, activeId }) {
+  const [outputs, setOutputs] = useState([]);
+  const [filter, setFilter]   = useState('all');
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    if (!clientId) { setOutputs([]); return; }
+    setLoading(true);
+    try {
+      const d = await apiFetch(`/api/clients/${clientId}/outputs`);
+      setOutputs(d.outputs || []);
+    } catch { setOutputs([]); }
+    finally { setLoading(false); }
+  }, [clientId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  // Expose reload so parent can call it after a new event
+  HistoryPanel._reload = load;
+
+  const visible = filter === 'all'
+    ? outputs
+    : outputs.filter(o => {
+        if (filter === 'email') return o.type === 'email' || o.type === 'email_reply';
+        return o.type === filter;
+      });
+
+  if (!clientId) return (
+    <div style={{ padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--text3)', fontSize: 12 }}>
+      Select a client to see their output history.
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="history-filter-row">
+        {FILTERS.map(f => (
+          <button
+            key={f.key}
+            className={`filter-btn ${filter === f.key ? 'active' : ''}`}
+            onClick={() => setFilter(f.key)}
+          >{f.label}</button>
+        ))}
+      </div>
+      {loading && (
+        <div style={{ fontSize: 11.5, color: 'var(--text3)', padding: '8px 0' }}>Loading…</div>
+      )}
+      {!loading && visible.length === 0 && (
+        <div style={{ fontSize: 11.5, color: 'var(--text3)', padding: '4px 0' }}>
+          {outputs.length === 0 ? 'No outputs yet — trigger an event to generate.' : 'No outputs match this filter.'}
+        </div>
+      )}
+      <div className="history-list">
+        {visible.map(o => (
+          <div
+            key={o.id}
+            className={`history-row ${activeId === o.id ? 'active' : ''}`}
+            onClick={() => onOpen(o)}
+          >
+            <span className="history-row-type">{OUTPUT_TYPE_LABELS[o.type] || o.type}</span>
+            <span className="history-row-title">{o.title.replace(/^[^a-zA-Z]+/, '')}</span>
+            <span className="history-row-date">{formatDate(o.created_at)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Spinner inline ───────────────────────────────────────────
 function InlineSpinner() {
   return (
@@ -703,6 +826,8 @@ function App() {
   const [memory, setMemory] = useState(null);
   const [history, setHistory] = useState([]);
   const [showChat, setShowChat] = useState(false);
+  const [historyOutput, setHistoryOutput] = useState(null); // output opened from history
+  const historyPanelRef = useRef(null);
 
   const loadClients = useCallback(async () => {
     try {
@@ -728,6 +853,7 @@ function App() {
     setResult(null);
     setError(null);
     setShowChat(false);
+    setHistoryOutput(null);
     try {
       const d = await apiFetch(`/api/clients/${c.client_id}/memory`);
       setMemory(d.memory || null);
@@ -762,6 +888,8 @@ function App() {
       setHistory(h => [{ id: Date.now(), type, client: selected.company_name, time: new Date().toLocaleTimeString(), outputs: Object.keys(res.outputs || {}).length }, ...h].slice(0, 8));
       await loadMemory();
       await loadClients();
+      // Reload history panel after new output is saved
+      if (HistoryPanel._reload) await HistoryPanel._reload();
     } catch (e) {
       setError(e.message);
     } finally {
@@ -778,11 +906,22 @@ function App() {
     await loadClients();
     await loadMemory();
     setResult(null);
+    setHistoryOutput(null);
+    if (HistoryPanel._reload) await HistoryPanel._reload();
   };
 
   const outputs = result ? Object.values(result.outputs || {}) : [];
   const EVENT_LABELS = { transcript: 'Transcript', email: 'Email Reply', meeting: 'Meeting Prep' };
   const freshSelected = selected ? (clients.find(c => c.client_id === selected.client_id) || selected) : null;
+
+  // The active output ID for the history panel selection indicator
+  const activeHistoryId = historyOutput?.id || null;
+
+  const openHistoryOutput = (o) => {
+    setHistoryOutput(o);
+    setResult(null);    // clear current event result
+    setError(null);
+  };
 
   return (
     <div className="app">
@@ -1017,8 +1156,23 @@ function App() {
             </div>
           )}
 
+          {/* History output view — when user clicks an item from history */}
+          {!loading && !result && !error && historyOutput && (
+            <div className="fade-in">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                <button
+                  className="btn btn-outline btn-sm"
+                  onClick={() => setHistoryOutput(null)}
+                  style={{ gap: 4 }}
+                >← Back</button>
+                <span style={{ fontSize: 11, color: 'var(--text3)' }}>From history · {formatDate(historyOutput.created_at)}</span>
+              </div>
+              <OutputPanel output={historyOutput} defaultOpen={true} />
+            </div>
+          )}
+
           {/* Empty state */}
-          {!loading && !result && !error && (
+          {!loading && !result && !error && !historyOutput && (
             <div className="empty-state">
               <div className="empty-state-title">Augusta PM Agent</div>
               <div className="empty-state-desc">
@@ -1079,6 +1233,16 @@ function App() {
             )}
           </div>
 
+          {/* Output History */}
+          <div className="sidebar-section">
+            <div className="sidebar-label">Output History</div>
+            <HistoryPanel
+              clientId={freshSelected?.client_id || null}
+              onOpen={openHistoryOutput}
+              activeId={activeHistoryId}
+            />
+          </div>
+
           {/* Insights */}
           {result?.insights && (
             <div className="sidebar-section">
@@ -1088,7 +1252,7 @@ function App() {
           )}
 
           {/* Suggested flow */}
-          {!result && (
+          {!result && !historyOutput && (
             <div className="sidebar-section">
               <div className="sidebar-label">Suggested Flow</div>
               <div className="steps">
@@ -1111,7 +1275,7 @@ function App() {
           )}
 
           {/* Test data */}
-          <div className="sidebar-section" style={{ marginTop: 'auto' }}>
+          <div className="sidebar-section">
             <div className="sidebar-label">Test Data</div>
             <div style={{ fontSize: 11.5, color: 'var(--text3)', lineHeight: 1.8 }}>
               <div><span style={{ color: 'var(--text2)', fontWeight: 500 }}>FinoVa Capital</span> — Fintech · 3 transcripts</div>

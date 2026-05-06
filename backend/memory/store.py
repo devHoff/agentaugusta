@@ -39,9 +39,12 @@ def upsert_client(client_id: str, updates: dict):
             "events": [],
             "open_items": [],
             "decisions": [],
+            "generated_outputs": [],
             "project_status": "discovery",
             "last_updated": datetime.utcnow().isoformat(),
         }
+    # Ensure generated_outputs exists on old records
+    data[client_id].setdefault("generated_outputs", [])
     data[client_id].update(updates)
     data[client_id]["last_updated"] = datetime.utcnow().isoformat()
     _save(data)
@@ -121,6 +124,29 @@ def get_client_summary(client_id: str) -> str:
         lines.append(f"\nAdditional Context:\n{extra}")
 
     return "\n".join(lines)
+
+
+def append_output(client_id: str, output: dict):
+    """Persist a generated output item for a client."""
+    import uuid
+    data = _load()
+    if client_id not in data:
+        upsert_client(client_id, {})
+        data = _load()
+    data[client_id].setdefault("generated_outputs", [])
+    output["id"] = str(uuid.uuid4())
+    output["created_at"] = datetime.utcnow().isoformat()
+    data[client_id]["generated_outputs"].append(output)
+    data[client_id]["last_updated"] = datetime.utcnow().isoformat()
+    _save(data)
+
+
+def get_outputs(client_id: str) -> list:
+    """Return all generated outputs for a client, newest first."""
+    data = _load()
+    client = data.get(client_id, {})
+    outputs = client.get("generated_outputs", [])
+    return list(reversed(outputs))
 
 
 def delete_client(client_id: str):

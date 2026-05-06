@@ -119,6 +119,13 @@ def get_client_summary(client_id: str):
     return {"client_id": client_id, "summary": summary}
 
 
+@app.get("/api/clients/{client_id}/outputs")
+def get_client_outputs(client_id: str):
+    """Get all persisted generated outputs for a client, newest first."""
+    outputs = store.get_outputs(client_id)
+    return {"client_id": client_id, "outputs": outputs}
+
+
 # ─────────────────────────────────────────────
 # Agent Events
 # ─────────────────────────────────────────────
