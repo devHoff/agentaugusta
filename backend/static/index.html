@@ -481,15 +481,17 @@ function OutputPanel({ output, defaultOpen = true }) {
 }
 
 // ── Transcript card ───────────────────────────────────────────────
-function TranscriptCard({ transcript, index, clientId, disabled, onOutputsGenerated }) {
-  const [loading, setLoading]   = useState(false);
-  const [outputs, setOutputs]   = useState([]);   // outputs for THIS transcript
-  const [error, setError]       = useState(null);
-  const [insights, setInsights] = useState(null);
-  const hasOutputs = outputs.length > 0;
+// outputs and onRun are controlled by the parent Workspace;
+// this component is purely presentational + trigger.
+function TranscriptCard({ transcript, index, clientId, persistedOutputs, onRun }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState(null);
+
+  // persistedOutputs: array of output objects already stored for this transcript
+  const hasOutputs = persistedOutputs && persistedOutputs.length > 0;
 
   const run = async () => {
-    if (loading || disabled) return;
+    if (loading) return;
     setLoading(true);
     setError(null);
     try {
@@ -497,10 +499,9 @@ function TranscriptCard({ transcript, index, clientId, disabled, onOutputsGenera
         method: 'POST',
         body: JSON.stringify({ client_id: clientId, transcript_id: transcript.id }),
       });
+      // Pass fresh outputs + insights up to Workspace
       const generated = Object.values(res.outputs || {});
-      setOutputs(generated);
-      if (res.insights) setInsights(res.insights);
-      if (onOutputsGenerated) onOutputsGenerated(res.insights);
+      onRun({ transcriptId: transcript.id, outputs: generated, insights: res.insights || null });
     } catch (e) {
       setError(e.message);
     } finally {
@@ -520,10 +521,12 @@ function TranscriptCard({ transcript, index, clientId, disabled, onOutputsGenera
           </div>
         </div>
         <div className="tx-card-right">
-          {hasOutputs && <span className="badge">{outputs.length} output{outputs.length !== 1 ? 's' : ''}</span>}
+          {hasOutputs && (
+            <span className="badge">{persistedOutputs.length} output{persistedOutputs.length !== 1 ? 's' : ''}</span>
+          )}
           <button
             className="btn btn-solid btn-sm"
-            disabled={loading || disabled}
+            disabled={loading}
             onClick={run}
           >
             {loading ? <><span className="spinner-sm" /> Running…</> : 'Run'}
@@ -549,12 +552,12 @@ function TranscriptCard({ transcript, index, clientId, disabled, onOutputsGenera
         </div>
       )}
 
-      {/* Outputs zone */}
+      {/* Outputs zone — driven by persisted state from parent */}
       {!loading && hasOutputs && (
         <div className="tx-outputs fade-in">
           <div className="tx-outputs-label">Generated outputs</div>
-          {outputs.map((o, i) => (
-            <OutputPanel key={i} output={o} defaultOpen={i === 0} />
+          {persistedOutputs.map((o, i) => (
+            <OutputPanel key={o.id || i} output={o} defaultOpen={i === 0} />
           ))}
         </div>
       )}
@@ -563,15 +566,15 @@ function TranscriptCard({ transcript, index, clientId, disabled, onOutputsGenera
 }
 
 // ── Event card (meeting / email) ──────────────────────────────────
-function EventCard({ title, desc, clientId, eventType, clientEmail, disabled, onOutputsGenerated }) {
-  const [loading, setLoading] = useState(false);
-  const [outputs, setOutputs] = useState([]);
-  const [error, setError]     = useState(null);
-  const [incomingEmail, setIncomingEmail] = useState(null);
-  const hasOutputs = outputs.length > 0;
+// Same pattern: parent owns output state, card just fires the event.
+function EventCard({ title, desc, clientId, eventType, persistedOutputs, persistedEmail, onRun }) {
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState(null);
+
+  const hasOutputs = persistedOutputs && persistedOutputs.length > 0;
 
   const run = async () => {
-    if (loading || disabled) return;
+    if (loading) return;
     setLoading(true);
     setError(null);
     try {
@@ -586,10 +589,13 @@ function EventCard({ title, desc, clientId, eventType, clientEmail, disabled, on
           method: 'POST',
           body: JSON.stringify({ client_id: clientId }),
         });
-        if (res.incoming_email) setIncomingEmail(res.incoming_email);
       }
-      setOutputs(Object.values(res.outputs || {}));
-      if (onOutputsGenerated) onOutputsGenerated();
+      const generated = Object.values(res.outputs || {});
+      onRun({
+        eventType,
+        outputs: generated,
+        incomingEmail: res.incoming_email || null,
+      });
     } catch (e) {
       setError(e.message);
     } finally {
@@ -605,10 +611,12 @@ function EventCard({ title, desc, clientId, eventType, clientEmail, disabled, on
           <div className="event-card-desc">{desc}</div>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0, marginLeft:12 }}>
-          {hasOutputs && <span className="badge">{outputs.length} output{outputs.length !== 1 ? 's' : ''}</span>}
+          {hasOutputs && (
+            <span className="badge">{persistedOutputs.length} output{persistedOutputs.length !== 1 ? 's' : ''}</span>
+          )}
           <button
             className="btn btn-outline btn-sm"
-            disabled={loading || disabled}
+            disabled={loading}
             onClick={run}
           >
             {loading ? <><span className="spinner-sm" /> Running…</> : 'Run'}
@@ -626,14 +634,14 @@ function EventCard({ title, desc, clientId, eventType, clientEmail, disabled, on
         </div>
       )}
 
-      {/* Incoming email preview */}
-      {!loading && incomingEmail && (
+      {/* Incoming email preview (persisted) */}
+      {!loading && persistedEmail && (
         <div className="email-banner">
           <div className="email-banner-label">Incoming email</div>
-          <div className="email-banner-subject">{incomingEmail.subject}</div>
-          <div className="email-banner-from">From: {incomingEmail.from}</div>
-          {incomingEmail.preview && (
-            <div className="email-banner-preview">{incomingEmail.preview}</div>
+          <div className="email-banner-subject">{persistedEmail.subject}</div>
+          <div className="email-banner-from">From: {persistedEmail.from}</div>
+          {persistedEmail.preview && (
+            <div className="email-banner-preview">{persistedEmail.preview}</div>
           )}
         </div>
       )}
@@ -650,12 +658,12 @@ function EventCard({ title, desc, clientId, eventType, clientEmail, disabled, on
         </div>
       )}
 
-      {/* Outputs */}
+      {/* Outputs — driven by persisted state from parent */}
       {!loading && hasOutputs && (
         <div className="tx-outputs fade-in">
           <div className="tx-outputs-label">Generated outputs</div>
-          {outputs.map((o, i) => (
-            <OutputPanel key={i} output={o} defaultOpen={i === 0} />
+          {persistedOutputs.map((o, i) => (
+            <OutputPanel key={o.id || i} output={o} defaultOpen={i === 0} />
           ))}
         </div>
       )}
@@ -879,14 +887,92 @@ function InsightsPanel({ insights }) {
 }
 
 // ── Client workspace ──────────────────────────────────────────────
+//
+// OUTPUT STATE LIVES HERE — keyed so it survives client switches.
+//
+// txOutputs:    { [transcriptId]: OutputObject[] }
+// eventOutputs: { meeting: OutputObject[], email: OutputObject[] }
+// emailMeta:    incoming email metadata for the email event card
+//
 function Workspace({ client, memory, onMemoryChange }) {
+  const [txOutputs, setTxOutputs]       = useState({});   // transcript outputs, keyed by tx id
+  const [eventOutputs, setEventOutputs] = useState({});   // event outputs, keyed by eventType
+  const [emailMeta, setEmailMeta]       = useState(null); // incoming email preview
   const [latestInsights, setLatestInsights] = useState(null);
-  const [showChat, setShowChat]             = useState(false);
+  const [showChat, setShowChat]         = useState(false);
+  const [outputsLoading, setOutputsLoading] = useState(true);
+
   const attendeeCount = (client.attendees || []).length;
   const augusta       = client.augusta_team || [];
 
-  const handleOutputsGenerated = useCallback((insights) => {
+  // ── Load persisted outputs from backend on mount / client change ──
+  useEffect(() => {
+    let cancelled = false;
+    setOutputsLoading(true);
+    setTxOutputs({});
+    setEventOutputs({});
+    setEmailMeta(null);
+    setLatestInsights(null);
+
+    apiFetch(`/api/clients/${client.client_id}/outputs`)
+      .then(data => {
+        if (cancelled) return;
+        const allOutputs = data.outputs || [];   // newest-first from backend
+
+        // Build a set of transcript IDs for this client
+        const txIds = new Set((client.transcripts || []).map(t => t.id));
+
+        const newTxOutputs  = {};
+        const newEvtOutputs = {};
+
+        // Outputs are newest-first; we want to display them oldest-first per card,
+        // so we reverse once then distribute.
+        const chronological = [...allOutputs].reverse();
+
+        chronological.forEach(o => {
+          if (o.event_type === 'transcript') {
+            // Match to a transcript by transcript_title or, if available, by transcript_id
+            // The orchestrator stores `transcript_title` in the output record.
+            const matchTx = (client.transcripts || []).find(t => t.title === o.transcript_title);
+            const key = matchTx ? matchTx.id : '__unmatched__';
+            if (!newTxOutputs[key]) newTxOutputs[key] = [];
+            newTxOutputs[key].push(o);
+          } else if (o.event_type === 'upcoming_meeting') {
+            if (!newEvtOutputs['meeting']) newEvtOutputs['meeting'] = [];
+            newEvtOutputs['meeting'].push(o);
+          } else if (o.event_type === 'email_reply') {
+            if (!newEvtOutputs['email']) newEvtOutputs['email'] = [];
+            newEvtOutputs['email'].push(o);
+          }
+        });
+
+        setTxOutputs(newTxOutputs);
+        setEventOutputs(newEvtOutputs);
+      })
+      .catch(() => { /* ignore — empty state is fine */ })
+      .finally(() => { if (!cancelled) setOutputsLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [client.client_id]);
+
+  // ── Called by TranscriptCard after a successful run ──
+  const handleTranscriptRun = useCallback(({ transcriptId, outputs, insights }) => {
+    // Merge new outputs into state immediately (optimistic, backend already persisted)
+    setTxOutputs(prev => ({
+      ...prev,
+      [transcriptId]: [...(prev[transcriptId] || []), ...outputs],
+    }));
     if (insights) setLatestInsights(insights);
+    onMemoryChange();
+  }, [onMemoryChange]);
+
+  // ── Called by EventCard after a successful run ──
+  const handleEventRun = useCallback(({ eventType, outputs, incomingEmail }) => {
+    setEventOutputs(prev => ({
+      ...prev,
+      [eventType]: [...(prev[eventType] || []), ...outputs],
+    }));
+    if (incomingEmail) setEmailMeta(incomingEmail);
     onMemoryChange();
   }, [onMemoryChange]);
 
@@ -932,7 +1018,12 @@ function Workspace({ client, memory, onMemoryChange }) {
           </span>
         </div>
 
-        {client.transcripts.length === 0 ? (
+        {outputsLoading ? (
+          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'18px 0', fontSize:12, color:'var(--text3)' }}>
+            <span className="spinner-sm" />
+            <span>Loading saved outputs…</span>
+          </div>
+        ) : client.transcripts.length === 0 ? (
           <div style={{ padding:'18px 0', fontSize:12, color:'var(--text3)' }}>No transcripts available.</div>
         ) : (
           client.transcripts.map((tx, i) => (
@@ -941,8 +1032,8 @@ function Workspace({ client, memory, onMemoryChange }) {
               transcript={tx}
               index={i}
               clientId={client.client_id}
-              disabled={false}
-              onOutputsGenerated={handleOutputsGenerated}
+              persistedOutputs={txOutputs[tx.id] || []}
+              onRun={handleTranscriptRun}
             />
           ))
         )}
@@ -961,8 +1052,9 @@ function Workspace({ client, memory, onMemoryChange }) {
             : "Generate a company research report before the first meeting"}
           clientId={client.client_id}
           eventType="meeting"
-          disabled={false}
-          onOutputsGenerated={handleOutputsGenerated}
+          persistedOutputs={eventOutputs['meeting'] || []}
+          persistedEmail={null}
+          onRun={handleEventRun}
         />
 
         {client.email && (
@@ -971,9 +1063,9 @@ function Workspace({ client, memory, onMemoryChange }) {
             desc={`From ${client.email.from_name} — "${client.email.subject}"`}
             clientId={client.client_id}
             eventType="email"
-            clientEmail={client.email}
-            disabled={false}
-            onOutputsGenerated={handleOutputsGenerated}
+            persistedOutputs={eventOutputs['email'] || []}
+            persistedEmail={emailMeta}
+            onRun={handleEventRun}
           />
         )}
       </div>
@@ -983,11 +1075,10 @@ function Workspace({ client, memory, onMemoryChange }) {
 
 // ── Main App ──────────────────────────────────────────────────────
 function App() {
-  const [clients, setClients]       = useState([]);
-  const [selected, setSelected]     = useState(null);
-  const [memory, setMemory]         = useState(null);
-  const [anyLoading, setAnyLoading] = useState(false);
-  const [showChat, setShowChat]     = useState(false);
+  const [clients, setClients]   = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [memory, setMemory]     = useState(null);
+  const [showChat, setShowChat] = useState(false);
 
   const loadClients = useCallback(async () => {
     try {
@@ -1029,6 +1120,7 @@ function App() {
       setMemory(null);
     } else if (!clientId) {
       setMemory(null);
+      setSelected(null);
     }
   };
 
