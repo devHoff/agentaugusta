@@ -8,7 +8,7 @@ An AI-powered **Project Management Agent** for Augusta's client engagements. Eve
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Single-Server App                     │
+│                    Single-Server App                    │
 │                                                         │
 │  FastAPI (port 8000)                                    │
 │  ├── /              → Serves HTML UI (React in-browser) │
@@ -99,7 +99,7 @@ git clone <repo-url>
 cd agentaugusta
 
 # Install Python dependencies
-python3 -m pip install -r backend/requirements.txt
+python -m pip install -r backend/requirements.txt
 
 # Create your local environment file
 cp .env.example .env
@@ -129,12 +129,12 @@ Then start the server:
 
 ```bash
 # Start the server
-python3 -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
+python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
 ```
 
 Open http://localhost:8000 in your browser.
 
-On Windows, if `python3` is not available, use `python` in the commands above.
+On Windows, if `python` is not available, use `python3` in the commands above.
 
 ### Environment Variables
 | Variable | Description |
