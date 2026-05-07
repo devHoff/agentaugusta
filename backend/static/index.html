@@ -920,10 +920,11 @@ function ChatPanel({ clientId, companyName, allOutputs, onVersionAdded }) {
   const [msgs, setMsgs]       = useState([]);
   const [input, setInput]     = useState('');
   const [loading, setLoading] = useState(false);
+  const [lastRefinedOutputId, setLastRefinedOutputId] = useState(null);
   const bottomRef = useRef(null);
 
   // Reset chat when client changes
-  useEffect(() => { setMsgs([]); setInput(''); }, [clientId]);
+  useEffect(() => { setMsgs([]); setInput(''); setLastRefinedOutputId(null); }, [clientId]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:'smooth' }); }, [msgs]);
 
@@ -955,12 +956,17 @@ function ChatPanel({ clientId, companyName, allOutputs, onVersionAdded }) {
           email_reply:     ['email reply', 'response', 'reply'],
         };
         let target = null;
+        let explicitlyTargeted = false;
         const tl = t.toLowerCase();
         for (const [type, keywords] of Object.entries(typeKeywords)) {
           if (keywords.some(k => tl.includes(k))) {
+            explicitlyTargeted = true;
             target = currentOutputs.find(o => o.type === type) || null;
             if (target) break;
           }
+        }
+        if (!explicitlyTargeted && lastRefinedOutputId) {
+          target = currentOutputs.find(o => o.id === lastRefinedOutputId) || null;
         }
         if (!target) target = currentOutputs[0]; // most recent
         if (!target || !target.id) {
@@ -991,6 +997,7 @@ function ChatPanel({ clientId, companyName, allOutputs, onVersionAdded }) {
             title:   data.title,
             content: data.content,
           }, false);
+          setLastRefinedOutputId(target.id);
 
           // Show a brief confirmation in chat
           const confirmMsg = `✓ New version created for **${(data.title || '').replace(/^[\u{1F300}-\u{1FFFF}\u2600-\u27FF\s]+/u, '').trim()}** — navigate with the ‹ › arrows in the output panel.`;
