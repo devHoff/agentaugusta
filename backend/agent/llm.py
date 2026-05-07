@@ -6,12 +6,19 @@ import os
 from typing import Any, Optional
 
 from dotenv import load_dotenv
+
+# Track whether Langfuse's patched OpenAI client is available.
+# Langfuse adds extra kwargs (name, metadata) to completions.create();
+# the standard OpenAI SDK does NOT accept those kwargs, so we gate on this flag.
+_LANGFUSE_AVAILABLE = False
 try:
     from langfuse.openai import OpenAI
-except ModuleNotFoundError:  # Langfuse is optional; tracing is disabled until installed.
+    _LANGFUSE_AVAILABLE = True
+except ModuleNotFoundError:
     from openai import OpenAI
 
 load_dotenv()
+
 
 def get_client() -> OpenAI:
     api_key = os.environ.get("OPENAI_API_KEY")
@@ -25,6 +32,7 @@ def get_client() -> OpenAI:
 
     return OpenAI(api_key=api_key)
 
+
 def chat(
     system,
     user,
@@ -35,17 +43,20 @@ def chat(
 ):
     client = get_client()
 
-    response = client.chat.completions.create(
-        name=trace_name,
+    kwargs = dict(
         model=model,
         messages=[
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
         max_tokens=max_completion_tokens,
-        metadata=metadata or {},
     )
+    # Langfuse-specific kwargs — only pass when the patched client is active
+    if _LANGFUSE_AVAILABLE:
+        kwargs["name"] = trace_name
+        kwargs["metadata"] = metadata or {}
 
+    response = client.chat.completions.create(**kwargs)
     return response.choices[0].message.content
 
 
@@ -60,12 +71,17 @@ def chat_with_history(
 ) -> str:
     client = get_client()
     all_messages = [{"role": "system", "content": system}] + messages
-    response = client.chat.completions.create(
-        name=trace_name,
+
+    kwargs = dict(
         model=model,
         messages=all_messages,
         temperature=temperature,
         max_tokens=max_completion_tokens,
-        metadata=metadata or {},
     )
+    # Langfuse-specific kwargs — only pass when the patched client is active
+    if _LANGFUSE_AVAILABLE:
+        kwargs["name"] = trace_name
+        kwargs["metadata"] = metadata or {}
+
+    response = client.chat.completions.create(**kwargs)
     return response.choices[0].message.content

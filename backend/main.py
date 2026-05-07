@@ -83,6 +83,16 @@ class ChatRequest(BaseModel):
     system_context: Optional[str] = ""
 
 
+class RefineRequest(BaseModel):
+    client_id: str
+    output_id: str
+    output_type: str
+    output_title: str
+    current_content: str
+    instruction: str
+    messages: List[dict]
+
+
 class ResetRequest(BaseModel):
     client_id: Optional[str] = None
 
@@ -263,6 +273,47 @@ def chat_endpoint(req: ChatRequest):
             )
             update_trace_output(span, {"response_length": len(response)})
         return {"response": response}
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/chat/refine")
+def refine_output_endpoint(req: RefineRequest):
+    """Refine/tweak an existing generated output based on a user instruction."""
+    try:
+        from backend.agent.llm import chat_with_history
+        meta_map = {c: d for c, d in store.get_all_clients().items()} if hasattr(store.get_all_clients(), 'items') else {}
+        memory_context = store.get_client_summary(req.client_id)
+
+        system = f"""You are an AI project management assistant at Augusta, a consulting firm.
+You are refining a previously generated {req.output_type} document for a client engagement.
+
+CURRENT PROJECT STATE:
+{memory_context}
+
+Your task: Apply the user's requested changes to the document below and return ONLY the revised document text — no explanations, no preamble, no "Here is the revised version:" prefix. Just the updated document content, ready to display as-is.
+
+CURRENT DOCUMENT TITLE: {req.output_title}
+CURRENT DOCUMENT CONTENT:
+{req.current_content}"""
+
+        messages = req.messages + [{"role": "user", "content": req.instruction}]
+        refined = chat_with_history(
+            system,
+            messages,
+            model="gpt-4o-mini",
+            max_completion_tokens=1500,
+            trace_name="output-refine",
+            metadata={"feature": "refine", "output_type": req.output_type, "client_id": req.client_id},
+        )
+        return {
+            "refined": True,
+            "output_id": req.output_id,
+            "output_type": req.output_type,
+            "title": req.output_title,
+            "content": refined,
+        }
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
