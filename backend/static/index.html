@@ -437,27 +437,43 @@ button { cursor: pointer; font-family: inherit; border: none; outline: none; bac
 .insight-row { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px; font-size: 12px; color: var(--text2); }
 .insight-mark { flex-shrink: 0; color: var(--text3); font-size: 11px; margin-top: 1px; }
 
-/* ── Version navigator (inside output panel header) ── */
-.ver-nav {
-  display: inline-flex; align-items: center; gap: 3px;
+/* ── Version tabs (inside output panel) ── */
+.ver-tabs-bar {
+  display: flex; align-items: center; gap: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  padding: 0 13px;
+  overflow-x: auto;
   flex-shrink: 0;
 }
-.ver-num {
-  font-size: 11px; font-weight: 600; color: var(--text3);
-  min-width: 14px; text-align: center; line-height: 1;
+.ver-tab {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 11px; font-size: 11px; font-weight: 500;
+  color: var(--text3); cursor: pointer; border: none; background: none;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  white-space: nowrap; transition: color 0.1s, border-color 0.1s;
+  flex-shrink: 0;
 }
-.ver-btn {
-  width: 20px; height: 20px; border-radius: 3px;
+.ver-tab:hover { color: var(--text2); }
+.ver-tab.active { color: var(--text); border-bottom-color: var(--text); }
+.ver-tab-label {
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; opacity: 0.65;
+}
+.ver-tab-num { font-size: 12px; font-weight: 700; }
+.ver-arrow-btn {
+  width: 22px; height: 22px; border-radius: 3px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--border); background: var(--bg);
-  color: var(--text3); font-size: 11px; cursor: pointer;
-  transition: all 0.1s; flex-shrink: 0; padding: 0;
+  color: var(--text3); font-size: 12px; cursor: pointer;
+  transition: all 0.12s; padding: 0; margin-left: 4px;
 }
-.ver-btn:hover:not(:disabled) { background: var(--bg2); color: var(--text); border-color: var(--border2); }
-.ver-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.ver-arrow-btn:hover:not(:disabled) { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+.ver-arrow-btn:disabled { opacity: 0.25; cursor: not-allowed; }
 .ver-refining {
   display: inline-flex; align-items: center; gap: 5px;
   font-size: 11px; color: var(--text3); flex-shrink: 0;
+  padding: 0 8px;
 }
 
 /* ── Misc ── */
@@ -565,15 +581,16 @@ const OUTPUT_TAG = {
   email_reply:     'Email Reply',
 };
 
-// ── Output panel (collapsible, with version navigator) ───────────
+// ── Output panel (collapsible, with version tabs) ───────────────
 function OutputPanel({ output, defaultOpen = true, extraVersions = [], isRefining = false }) {
-  const [open, setOpen]       = useState(defaultOpen);
-  const [verIdx, setVerIdx]   = useState(0);
+  const [open, setOpen]     = useState(defaultOpen);
+  const [verIdx, setVerIdx] = useState(0);
 
   // versions array: [original, ...tweaked versions]
   const versions = [output, ...extraVersions];
+  const total    = versions.length;
 
-  // When a new version is pushed, auto-advance to it
+  // When a new version is pushed, auto-advance to it and open panel
   const prevLen = React.useRef(versions.length);
   useEffect(() => {
     if (versions.length > prevLen.current) {
@@ -583,46 +600,66 @@ function OutputPanel({ output, defaultOpen = true, extraVersions = [], isRefinin
     prevLen.current = versions.length;
   }, [versions.length]);
 
-  const current  = versions[verIdx] || output;
-  const tag      = OUTPUT_TAG[current.type] || current.type;
+  const current    = versions[verIdx] || output;
+  const tag        = OUTPUT_TAG[current.type] || current.type;
   const cleanTitle = (current.title || '').replace(/^[\u{1F300}-\u{1FFFF}\u2600-\u27FF\s]+/u, '').trim() || tag;
-  const total    = versions.length;
 
   const stopProp = e => e.stopPropagation();
 
+  // Tab labels: version 1 = "Original", subsequent = "Edit 1", "Edit 2"…
+  const tabLabel = (i) => i === 0 ? 'Original' : `Edit ${i}`;
+
   return (
     <div className="output-panel fade-in">
+
+      {/* ── Panel header (title + collapse toggle) ── */}
       <div className={`output-head ${open ? 'open' : ''}`} onClick={() => setOpen(o => !o)}>
         <div className="output-head-left">
           <span className="output-type-tag">{tag}</span>
           <span className="output-title">{cleanTitle}</span>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:7 }} onClick={stopProp}>
-          {/* Version navigator — only shown when >1 version or actively refining */}
-          {(total > 1 || isRefining) && (
-            <div className="ver-nav">
-              <button
-                className="ver-btn"
-                disabled={verIdx === 0}
-                onClick={() => setVerIdx(i => i - 1)}
-                title="Previous version"
-              >‹</button>
-              <span className="ver-num">{verIdx + 1}</span>
-              <button
-                className="ver-btn"
-                disabled={verIdx === total - 1 || isRefining}
-                onClick={() => setVerIdx(i => i + 1)}
-                title="Next version"
-              >›</button>
-            </div>
-          )}
           {isRefining && (
-            <span className="ver-refining"><span className="spinner-sm" /></span>
+            <span className="ver-refining"><span className="spinner-sm" /><span style={{fontSize:10}}>Generating…</span></span>
           )}
           {open && !isRefining && <CopyBtn text={current.content} />}
           <span className="output-chevron" onClick={() => setOpen(o => !o)} style={{cursor:'pointer'}}>{open ? '▲' : '▼'}</span>
         </div>
       </div>
+
+      {/* ── Version tab bar — only shown when open and multiple versions exist (or refining) ── */}
+      {open && (total > 1 || isRefining) && (
+        <div className="ver-tabs-bar" onClick={stopProp}>
+          {versions.map((_, i) => (
+            <button
+              key={i}
+              className={`ver-tab ${verIdx === i ? 'active' : ''}`}
+              onClick={() => setVerIdx(i)}
+              title={i === 0 ? 'Original version' : `Edited version ${i}`}
+            >
+              <span className="ver-tab-label">{tabLabel(i)}</span>
+              <span className="ver-tab-num">{i + 1}</span>
+            </button>
+          ))}
+          {/* Spinner tab shown while a new version is being generated */}
+          {isRefining && (
+            <div className="ver-tab" style={{cursor:'default', gap:5}}>
+              <span className="spinner-sm" style={{width:10,height:10}} />
+              <span className="ver-tab-label">Edit {total}</span>
+            </div>
+          )}
+          {/* Right-arrow button to advance to next version */}
+          <button
+            className="ver-arrow-btn"
+            disabled={verIdx >= total - 1 || isRefining}
+            onClick={() => setVerIdx(i => Math.min(i + 1, total - 1))}
+            title="Next version"
+            style={{marginLeft:'auto'}}
+          >→</button>
+        </div>
+      )}
+
+      {/* ── Content body ── */}
       {open && (
         <div className="output-body">
           <MD src={current.content} />
