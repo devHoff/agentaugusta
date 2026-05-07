@@ -7,13 +7,8 @@ from typing import Any, Optional
 
 from dotenv import load_dotenv
 
-# Track whether Langfuse's patched OpenAI client is available.
-# Langfuse adds extra kwargs (name, metadata) to completions.create();
-# the standard OpenAI SDK does NOT accept those kwargs, so we gate on this flag.
-_LANGFUSE_AVAILABLE = False
 try:
     from langfuse.openai import OpenAI
-    _LANGFUSE_AVAILABLE = True
 except ModuleNotFoundError:
     from openai import OpenAI
 
@@ -51,11 +46,6 @@ def chat(
         ],
         max_tokens=max_completion_tokens,
     )
-    # Langfuse-specific kwargs — only pass when the patched client is active
-    if _LANGFUSE_AVAILABLE:
-        kwargs["name"] = trace_name
-        kwargs["metadata"] = metadata or {}
-
     response = client.chat.completions.create(**kwargs)
     return response.choices[0].message.content
 
@@ -78,10 +68,5 @@ def chat_with_history(
         temperature=temperature,
         max_tokens=max_completion_tokens,
     )
-    # Langfuse-specific kwargs — only pass when the patched client is active
-    if _LANGFUSE_AVAILABLE:
-        kwargs["name"] = trace_name
-        kwargs["metadata"] = metadata or {}
-
     response = client.chat.completions.create(**kwargs)
     return response.choices[0].message.content

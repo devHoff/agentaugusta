@@ -136,9 +136,33 @@ def append_output(client_id: str, output: dict):
     data[client_id].setdefault("generated_outputs", [])
     output["id"] = str(uuid.uuid4())
     output["created_at"] = datetime.utcnow().isoformat()
+    output.setdefault("versions", [])
     data[client_id]["generated_outputs"].append(output)
     data[client_id]["last_updated"] = datetime.utcnow().isoformat()
     _save(data)
+    return output
+
+
+def append_output_version(client_id: str, output_id: str, version: dict) -> Optional[dict]:
+    """Append a refined version to an existing generated output."""
+    import uuid
+    data = _load()
+    client = data.get(client_id)
+    if not client:
+        return None
+
+    for output in client.get("generated_outputs", []):
+        if output.get("id") == output_id:
+            output.setdefault("versions", [])
+            version["id"] = str(uuid.uuid4())
+            version["created_at"] = datetime.utcnow().isoformat()
+            version["version_number"] = len(output["versions"]) + 2
+            output["versions"].append(version)
+            client["last_updated"] = datetime.utcnow().isoformat()
+            _save(data)
+            return version
+
+    return None
 
 
 def get_outputs(client_id: str) -> list:

@@ -126,14 +126,22 @@ def handle_transcript(client_id: str, transcript_id: str = None, custom_transcri
         store.append_open_item(client_id, item)
 
     # STEP 6: Persist generated outputs to history
-    for item in outputs["outputs"].values():
-        store.append_output(client_id, {
+    for key, item in outputs["outputs"].items():
+        persisted = store.append_output(client_id, {
             "type": item["type"],
             "title": item["title"],
             "content": item["content"],
             "event_type": outputs["event_type"],
             "transcript_id": transcript_obj["id"] if not custom_transcript else "custom",
             "transcript_title": transcript_title,
+        })
+        outputs["outputs"][key].update({
+            "id": persisted["id"],
+            "created_at": persisted["created_at"],
+            "event_type": persisted["event_type"],
+            "transcript_id": persisted.get("transcript_id"),
+            "transcript_title": persisted.get("transcript_title"),
+            "versions": persisted.get("versions", []),
         })
 
     return outputs
@@ -197,12 +205,18 @@ def handle_upcoming_meeting(client_id: str) -> dict:
         })
 
     # Persist generated outputs to history
-    for item in outputs["outputs"].values():
-        store.append_output(client_id, {
+    for key, item in outputs["outputs"].items():
+        persisted = store.append_output(client_id, {
             "type": item["type"],
             "title": item["title"],
             "content": item["content"],
             "event_type": outputs["event_type"],
+        })
+        outputs["outputs"][key].update({
+            "id": persisted["id"],
+            "created_at": persisted["created_at"],
+            "event_type": persisted["event_type"],
+            "versions": persisted.get("versions", []),
         })
 
     return outputs
@@ -271,13 +285,20 @@ def handle_email_reply(client_id: str, custom_email: dict = None) -> dict:
     }
 
     # Persist generated outputs to history
-    for item in result["outputs"].values():
-        store.append_output(client_id, {
+    for key, item in result["outputs"].items():
+        persisted = store.append_output(client_id, {
             "type": item["type"],
             "title": item["title"],
             "content": item["content"],
             "event_type": result["event_type"],
             "subject": email_data.get("subject", ""),
+        })
+        result["outputs"][key].update({
+            "id": persisted["id"],
+            "created_at": persisted["created_at"],
+            "event_type": persisted["event_type"],
+            "subject": persisted.get("subject"),
+            "versions": persisted.get("versions", []),
         })
 
     return result

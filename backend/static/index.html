@@ -481,7 +481,8 @@ async function apiFetch(path, opts = {}) {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(err.detail || 'Request failed');
+    const detail = err.detail || err.message || res.statusText;
+    throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
   }
   return res.json();
 }
@@ -935,8 +936,11 @@ function ChatPanel({ clientId, companyName, allOutputs, onVersionAdded }) {
     setLoading(true);
 
     try {
+      const liveWorkspace = _wsRegistry[clientId] || {};
+      const currentOutputs = liveWorkspace.allFlatOutputs || allOutputs || [];
+      const versionCallback = liveWorkspace.onVersionAdded || onVersionAdded;
       // Check if user is asking to refine one of the visible outputs
-      const isRefine = detectRefineIntent(t) && allOutputs && allOutputs.length > 0;
+      const isRefine = detectRefineIntent(t) && currentOutputs.length > 0;
 
       if (isRefine) {
         // Find the most relevant output to refine:
@@ -954,14 +958,18 @@ function ChatPanel({ clientId, companyName, allOutputs, onVersionAdded }) {
         const tl = t.toLowerCase();
         for (const [type, keywords] of Object.entries(typeKeywords)) {
           if (keywords.some(k => tl.includes(k))) {
-            target = allOutputs.find(o => o.type === type) || null;
+            target = currentOutputs.find(o => o.type === type) || null;
             if (target) break;
           }
         }
-        if (!target) target = allOutputs[0]; // most recent
+        if (!target) target = currentOutputs[0]; // most recent
+        if (!target || !target.id) {
+          setMsgs([...newMsgs, { role:'assistant', content:'I need a saved output before I can create a new version. Please run the event once, then ask me to tweak it.' }]);
+          return;
+        }
 
         // Notify parent that refining has started for this output
-        onVersionAdded && onVersionAdded(target.id, null, true);
+        versionCallback && versionCallback(target.id, null, true);
 
         try {
           const data = await apiFetch('/api/chat/refine', {
@@ -978,7 +986,7 @@ function ChatPanel({ clientId, companyName, allOutputs, onVersionAdded }) {
           });
 
           // Push new version to the target output panel
-          onVersionAdded && onVersionAdded(target.id, {
+          versionCallback && versionCallback(target.id, data.version || {
             type:    data.output_type,
             title:   data.title,
             content: data.content,
@@ -989,7 +997,7 @@ function ChatPanel({ clientId, companyName, allOutputs, onVersionAdded }) {
           setMsgs([...newMsgs, { role:'assistant', content: confirmMsg }]);
 
         } catch (e) {
-          onVersionAdded && onVersionAdded(target.id, null, false);
+          versionCallback && versionCallback(target.id, null, false);
           setMsgs([...newMsgs, { role:'assistant', content:`Error: ${e.message}` }]);
         }
 
@@ -1096,10 +1104,14 @@ function Workspace({ client, memory, onMemoryChange }) {
         const allOutputs    = data.outputs || [];
         const newTxOutputs  = {};
         const newEvtOutputs = {};
+        const newVersions   = {};
         const norm = v => (v || '').replace(/\s+/g, ' ').trim().toLowerCase();
         const chronological = [...allOutputs].reverse();
 
         chronological.forEach(o => {
+          if (o.id && Array.isArray(o.versions)) {
+            newVersions[o.id] = o.versions;
+          }
           if (o.event_type === 'transcript') {
             const matchTx = (client.transcripts || []).find(t =>
               t.id === o.transcript_id || norm(t.title) === norm(o.transcript_title)
@@ -1118,6 +1130,7 @@ function Workspace({ client, memory, onMemoryChange }) {
 
         setTxOutputs(newTxOutputs);
         setEventOutputs(newEvtOutputs);
+        setOutputVersions(newVersions);
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setOutputsLoading(false); });
@@ -1162,15 +1175,20 @@ function Workspace({ client, memory, onMemoryChange }) {
   // Flatten all current outputs for ChatPanel targeting (most recent first)
   const allFlatOutputs = useMemo(() => {
     const flat = [];
+    const withLatestVersion = o => {
+      const versions = o && o.id ? (outputVersions[o.id] || []) : [];
+      const latest = versions[versions.length - 1];
+      return latest ? { ...o, content: latest.content, title: latest.title || o.title, type: latest.type || o.type } : o;
+    };
     // Transcript outputs (newest transcript first, then outputs within)
     [...(client.transcripts || [])].reverse().forEach(tx => {
-      (txOutputs[tx.id] || []).forEach(o => flat.push(o));
+      [...(txOutputs[tx.id] || [])].reverse().forEach(o => flat.push(withLatestVersion(o)));
     });
     // Event outputs
-    (eventOutputs['email'] || []).forEach(o => flat.push(o));
-    (eventOutputs['meeting'] || []).forEach(o => flat.push(o));
+    (eventOutputs['email'] || []).forEach(o => flat.push(withLatestVersion(o)));
+    (eventOutputs['meeting'] || []).forEach(o => flat.push(withLatestVersion(o)));
     return flat;
-  }, [txOutputs, eventOutputs, client.transcripts]);
+  }, [txOutputs, eventOutputs, outputVersions, client.transcripts]);
 
   return (
     <>

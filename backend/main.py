@@ -90,7 +90,7 @@ class RefineRequest(BaseModel):
     output_title: str
     current_content: str
     instruction: str
-    messages: List[dict]
+    messages: List[dict] = []
 
 
 class ResetRequest(BaseModel):
@@ -307,13 +307,25 @@ CURRENT DOCUMENT CONTENT:
             trace_name="output-refine",
             metadata={"feature": "refine", "output_type": req.output_type, "client_id": req.client_id},
         )
+        version = store.append_output_version(req.client_id, req.output_id, {
+            "type": req.output_type,
+            "title": req.output_title,
+            "content": refined,
+            "instruction": req.instruction,
+        })
+        if not version:
+            raise HTTPException(status_code=404, detail=f"Output '{req.output_id}' not found")
+
         return {
             "refined": True,
             "output_id": req.output_id,
             "output_type": req.output_type,
             "title": req.output_title,
             "content": refined,
+            "version": version,
         }
+    except HTTPException:
+        raise
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
